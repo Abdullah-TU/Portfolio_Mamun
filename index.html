@@ -930,7 +930,7 @@ function resize() {
 function makeDots(n) {
   return Array.from({length: n}, () => ({
     x: Math.random()*W, y: Math.random()*H,
-    vx: (Math.random()-0.5)*0.6, vy: (Math.random()-0.5)*0.6,
+    vx: (Math.random()-0.5)*2.5, vy: (Math.random()-0.5)*2.5,
     r: Math.random()*2.5+1.5
   }));
 }
