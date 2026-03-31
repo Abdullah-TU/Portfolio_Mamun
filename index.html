@@ -328,6 +328,8 @@ footer span { color: var(--teal); }
 <section class="hero">
   <div class="hero-bg"></div>
   <div class="hero-grid"></div>
+  <div class="hero-grid"></div>
+  <canvas id="neural" style="position:absolute;inset:0;width:100%;height:100%;z-index:0;"></canvas>
   <div class="hero-content">
     <img src="https://avatars.githubusercontent.com/u/16822543?v=4" alt="Md. Abdullah-Al Mamun"
          style="width:140px;height:140px;border-radius:50%;border:3px solid #0ef4c8;object-fit:cover;margin-bottom:1.5rem;box-shadow:0 0 28px rgba(14,244,200,0.35);">
@@ -916,6 +918,54 @@ const observer = new IntersectionObserver(entries => {
   entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
 }, { threshold: 0.08 });
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// Neural network animation
+const canvas = document.getElementById('neural');
+const ctx = canvas.getContext('2d');
+let W, H, dots;
+function resize() {
+  W = canvas.width = canvas.offsetWidth;
+  H = canvas.height = canvas.offsetHeight;
+}
+function makeDots(n) {
+  return Array.from({length: n}, () => ({
+    x: Math.random()*W, y: Math.random()*H,
+    vx: (Math.random()-0.5)*0.6, vy: (Math.random()-0.5)*0.6,
+    r: Math.random()*2.5+1.5
+  }));
+}
+function draw() {
+  ctx.clearRect(0,0,W,H);
+  const maxDist = 140;
+  for(let i=0;i<dots.length;i++){
+    const d = dots[i];
+    d.x += d.vx; d.y += d.vy;
+    if(d.x<0||d.x>W) d.vx*=-1;
+    if(d.y<0||d.y>H) d.vy*=-1;
+    ctx.beginPath();
+    ctx.arc(d.x,d.y,d.r,0,Math.PI*2);
+    ctx.fillStyle='rgba(14,244,200,0.7)';
+    ctx.fill();
+    for(let j=i+1;j<dots.length;j++){
+      const b=dots[j];
+      const dx=d.x-b.x, dy=d.y-b.y;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist<maxDist){
+        ctx.beginPath();
+        ctx.moveTo(d.x,d.y);
+        ctx.lineTo(b.x,b.y);
+        ctx.strokeStyle=`rgba(14,244,200,${0.15*(1-dist/maxDist)})`;
+        ctx.lineWidth=0.6;
+        ctx.stroke();
+      }
+    }
+  }
+  requestAnimationFrame(draw);
+}
+resize();
+dots = makeDots(60);
+draw();
+window.addEventListener('resize', ()=>{ resize(); dots=makeDots(60); });
 </script>
 </body>
 </html>
