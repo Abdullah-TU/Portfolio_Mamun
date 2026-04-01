@@ -912,20 +912,109 @@ footer span { color: var(--teal); }
 </section>
 <!-- ⑦ CONTACT -->
 <section id="contact" class="contact-section">
-  <div class="contact-inner reveal">
+  <div class="section-inner reveal">
     <div class="section-label" style="text-align:center;">Get In Touch</div>
     <h2 class="section-title" style="text-align:center;">Let's Connect &amp; Collaborate</h2>
-    <p style="color:var(--text2);font-size:1rem;text-align:center;margin-top:0.5rem;">Open to research collaborations, doctoral opportunities, and data science roles.</p>
-    <div class="contact-links">
-      <a class="contact-link" href="mailto:md.abdullah.al.mamun.tu@gmail.com">📧 md.abdullah.al.mamun.tu@gmail.com</a>
-      <a class="contact-link" href="https://github.com/Abdullah-TU" target="_blank">💻 GitHub: Abdullah-TU</a>
-      <a class="contact-link" href="https://www.linkedin.com/in/md-abdullah-al-mamun-a23416b8/" target="_blank">🔗 LinkedIn Profile</a>
-      <a class="contact-link" href="https://scholar.google.com/citations?user=6iTitIQAAAAJ" target="_blank">📚 Google Scholar</a>
-      <a class="contact-link" href="https://orcid.org/0009-0001-6749-9171" target="_blank">🆔 ORCID: 0009-0001-6749-9171</a>
+    <p style="color:var(--text2);font-size:1rem;text-align:center;margin-top:0.5rem;">
+      Open to research collaborations, doctoral opportunities, and data science roles.
+    </p>
+
+    <!-- TWO COLUMN LAYOUT -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:2.5rem;">
+
+      <!-- LEFT — contact links -->
+      <div style="display:flex;flex-direction:column;gap:1rem;">
+
+        <!-- Email -->
+        <a href="mailto:md.abdullah.al.mamun.tu@gmail.com"
+           style="display:flex;align-items:center;gap:1rem;padding:1rem 1.2rem;background:var(--card);border:1px solid var(--border);border-radius:6px;text-decoration:none;color:var(--text2);transition:all 0.2s;"
+           onmouseover="this.style.borderColor='#0ef4c8';this.style.color='#0ef4c8'"
+           onmouseout="this.style.borderColor='rgba(14,244,200,0.12)';this.style.color='#8aaece'">
+          <span style="font-size:1.4rem;">📧</span>
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--teal);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.2rem;">Email</div>
+            <div style="font-size:0.82rem;">md.abdullah.al.mamun.tu@gmail.com</div>
+          </div>
+        </a>
+
+        <!-- Location -->
+        <div style="display:flex;align-items:center;gap:1rem;padding:1rem 1.2rem;background:var(--card);border:1px solid var(--border);border-radius:6px;color:var(--text2);">
+          <span style="font-size:1.4rem;">📍</span>
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--teal);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.2rem;">Location</div>
+            <div style="font-size:0.82rem;">Salo, Finland 🇫🇮</div>
+          </div>
+        </div>
+
+        <!-- GitHub -->
+        <a href="https://github.com/Abdullah-TU" target="_blank"
+           style="display:flex;align-items:center;gap:1rem;padding:1rem 1.2rem;background:var(--card);border:1px solid var(--border);border-radius:6px;text-decoration:none;color:var(--text2);transition:all 0.2s;"
+           onmouseover="this.style.borderColor='#0ef4c8';this.style.color='#0ef4c8'"
+           onmouseout="this.style.borderColor='rgba(14,244,200,0.12)';this.style.color='#8aaece'">
+          <span style="font-size:1.4rem;">💻</span>
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--teal);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.2rem;">GitHub</div>
+            <div style="font-size:0.82rem;">github.com/Abdullah-TU</div>
+          </div>
+        </a>
+
+        <!-- LinkedIn -->
+        <a href="https://www.linkedin.com/in/md-abdullah-al-mamun-a23416b8/" target="_blank"
+           style="display:flex;align-items:center;gap:1rem;padding:1rem 1.2rem;background:var(--card);border:1px solid var(--border);border-radius:6px;text-decoration:none;color:var(--text2);transition:all 0.2s;"
+           onmouseover="this.style.borderColor='#0ef4c8';this.style.color='#0ef4c8'"
+           onmouseout="this.style.borderColor='rgba(14,244,200,0.12)';this.style.color='#8aaece'">
+          <span style="font-size:1.4rem;">🔗</span>
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--teal);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.2rem;">LinkedIn</div>
+            <div style="font-size:0.82rem;">md-abdullah-al-mamun</div>
+          </div>
+        </a>
+
+        <!-- Google Scholar -->
+        <a href="https://scholar.google.com/citations?user=6iTitIQAAAAJ" target="_blank"
+           style="display:flex;align-items:center;gap:1rem;padding:1rem 1.2rem;background:var(--card);border:1px solid var(--border);border-radius:6px;text-decoration:none;color:var(--text2);transition:all 0.2s;"
+           onmouseover="this.style.borderColor='#0ef4c8';this.style.color='#0ef4c8'"
+           onmouseout="this.style.borderColor='rgba(14,244,200,0.12)';this.style.color='#8aaece'">
+          <span style="font-size:1.4rem;">📚</span>
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--teal);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.2rem;">Google Scholar</div>
+            <div style="font-size:0.82rem;">View Publications</div>
+          </div>
+        </a>
+
+        <!-- ORCID -->
+        <a href="https://orcid.org/0009-0001-6749-9171" target="_blank"
+           style="display:flex;align-items:center;gap:1rem;padding:1rem 1.2rem;background:var(--card);border:1px solid var(--border);border-radius:6px;text-decoration:none;color:var(--text2);transition:all 0.2s;"
+           onmouseover="this.style.borderColor='#0ef4c8';this.style.color='#0ef4c8'"
+           onmouseout="this.style.borderColor='rgba(14,244,200,0.12)';this.style.color='#8aaece'">
+          <span style="font-size:1.4rem;">🆔</span>
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--teal);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.2rem;">ORCID</div>
+            <div style="font-size:0.82rem;">0009-0001-6749-9171</div>
+          </div>
+        </a>
+
+      </div>
+
+      <!-- RIGHT — Map -->
+      <div style="border-radius:8px;overflow:hidden;border:1px solid var(--border);position:relative;min-height:400px;">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:10;background:linear-gradient(180deg,rgba(6,11,20,0.7),transparent);padding:0.8rem 1rem;">
+          <span style="font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--teal);letter-spacing:0.12em;text-transform:uppercase;">📍 Salo, Finland</span>
+        </div>
+        <iframe
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15696.123456789!2d23.1340!3d60.3845!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x468c8f5b5b5b5b5b%3A0x1234567890abcdef!2sSalo%2C%20Finland!5e0!3m2!1sen!2sfi!4v1234567890"
+          width="100%"
+          height="400"
+          style="border:0;filter:invert(90%) hue-rotate(180deg) saturate(0.8) brightness(0.85);"
+          allowfullscreen=""
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade">
+        </iframe>
+      </div>
+
     </div>
   </div>
 </section>
-
 <footer><span>Md. Abdullah-Al Mamun</span> · Salo, Finland · 2026</footer>
 
 <script>
