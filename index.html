@@ -921,7 +921,7 @@ footer span { color: var(--teal); }
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:2.5rem;align-items:stretch;">
 
-      <!-- LEFT — contact links -->
+      <!-- LEFT -->
       <div style="display:flex;flex-direction:column;gap:0.9rem;">
 
         <a href="mailto:md.abdullah.al.mamun.tu@gmail.com"
@@ -1001,10 +1001,10 @@ footer span { color: var(--teal); }
 
       </div>
 
-      <!-- RIGHT — Map with legend -->
-      <div style="border-radius:8px;overflow:hidden;border:1px solid var(--border);display:flex;flex-direction:column;position:relative;">
+      <!-- RIGHT — Map -->
+      <div style="border-radius:8px;overflow:hidden;border:1px solid var(--border);display:flex;flex-direction:column;position:relative;min-height:460px;">
 
-        <!-- White legend card on top -->
+        <!-- Legend card — outside filter, stays normal colors -->
         <div style="position:absolute;top:10px;left:10px;z-index:20;background:white;border-radius:8px;padding:10px 14px;min-width:230px;box-shadow:0 2px 12px rgba(0,0,0,0.5);">
           <div style="font-weight:700;font-size:0.88rem;color:#1a1a1a;margin-bottom:2px;">Isotuvankatu 5A</div>
           <div style="font-size:0.75rem;color:#666;margin-bottom:8px;">24260 Salo, Finland</div>
@@ -1023,11 +1023,13 @@ footer span { color: var(--teal); }
           </div>
         </div>
 
-        <!-- Map iframe -->
+        <!-- Map — dark filter BUT keeping red pin red using brightness only -->
         <iframe
           src="https://maps.google.com/maps?q=Isotuvankatu+5A,+24260+Salo,+Finland&t=&z=16&ie=UTF8&iwloc=B&output=embed"
           width="100%"
-          style="border:0;display:block;flex:1;min-height:460px;filter:invert(90%) hue-rotate(180deg) saturate(0.7) brightness(0.9);"
+          height="460"
+          style="border:0;display:block;width:100%;height:100%;min-height:460px;
+                 filter:brightness(0.5) contrast(1.3) saturate(0.5);"
           allowfullscreen=""
           loading="lazy"
           referrerpolicy="no-referrer-when-downgrade">
@@ -1036,25 +1038,25 @@ footer span { color: var(--teal); }
       </div>
 
     </div>
-<footer><span>Md. Abdullah-Al Mamun</span> · Salo, Finland · 2026</footer>
+  </div>
+</section>
+
+<footer>
+  Built for <span>Md. Abdullah-Al Mamun</span> · Data Scientist &amp; Researcher · Salo, Finland · 2026
+</footer>
 
 <script>
-// Expand/collapse publication cards
 function togglePub(el) {
   const isOpen = el.classList.contains('open');
-  // Close all first
   document.querySelectorAll('.pub-item').forEach(p => p.classList.remove('open'));
-  // Open clicked if it was closed
   if (!isOpen) el.classList.add('open');
 }
 
-// Scroll reveal
 const observer = new IntersectionObserver(entries => {
   entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
 }, { threshold: 0.08 });
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-// Neural network animation
 const canvas = document.getElementById('neural');
 const ctx = canvas.getContext('2d');
 let W, H, dots;
@@ -1090,7 +1092,7 @@ function draw() {
         ctx.moveTo(d.x,d.y);
         ctx.lineTo(b.x,b.y);
         ctx.strokeStyle=`rgba(14,244,200,${0.55*(1-dist/maxDist)})`;
-        ctx.lineWidth=1.0;
+        ctx.lineWidth=1.8;
         ctx.stroke();
       }
     }
