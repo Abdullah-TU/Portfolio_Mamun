@@ -727,8 +727,7 @@ footer span { color: var(--teal); }
         </div>
       </div>
 
-      <!-- PAPER 7 -->
-      <div class="pub-item" onclick="togglePub(this)">
+       <div class="pub-item" onclick="togglePub(this)">
         <div class="pub-header">
           <div class="pub-num">7</div>
           <div class="pub-header-main">
@@ -767,6 +766,22 @@ footer span { color: var(--teal); }
               </div>
               <div class="pub-img-caption">Fig. Graphical Abstract — Groundwater Phosphate Prediction</div>
             </div>
+
+            <!-- ===== PDF READER (FULL WIDTH — spans both columns) ===== -->
+            <div style="grid-column:1 / -1; margin-top:1.5rem;">
+              <div class="pub-section-label">📖 Read Full Paper</div>
+              <iframe
+                src="https://mozilla.github.io/pdf.js/web/viewer.html?file=https://raw.githubusercontent.com/Abdullah-TU/Portfolio/main/1%20Predicting%20groundwater%20phosphate%20levels%20in%20coastal%20multi-aquifers%20A.pdf"
+                style="width:100%;height:850px;border:1px solid var(--border);border-radius:6px;background:#fff;margin-top:0.5rem;display:block;"
+                loading="lazy">
+              </iframe>
+              <a href="https://github.com/Abdullah-TU/Portfolio/raw/main/1%20Predicting%20groundwater%20phosphate%20levels%20in%20coastal%20multi-aquifers%20A.pdf" target="_blank"
+                 style="display:inline-block;font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--muted);margin-top:0.6rem;text-decoration:none;">
+                ↗ Open PDF in new tab
+              </a>
+            </div>
+            <!-- ===== END PDF READER ===== -->
+
           </div>
         </div>
       </div>
