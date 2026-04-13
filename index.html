@@ -1417,52 +1417,151 @@ const observer = new IntersectionObserver(entries => {
 }, { threshold: 0.08 });
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
+/* ============================================================
+   NEURAL NETWORK → ROTATING GLOBE animation
+   Phase 1 (0-8s):   free-floating neural network (original)
+   Phase 2 (8-12s):  dots smoothly migrate to globe positions
+   Phase 3 (12-22s): rotating dotted globe with arc connections
+   Phase 4 (22-26s): dots scatter back to free-float
+   ...then loops
+============================================================ */
 const canvas = document.getElementById('neural');
 const ctx = canvas.getContext('2d');
-let W, H, dots;
+let W, H, dots, startTime;
+const NUM_DOTS = 80;
+
 function resize() {
   W = canvas.width = canvas.offsetWidth;
   H = canvas.height = canvas.offsetHeight;
 }
+
+/* Generate evenly-distributed points on a sphere using the Fibonacci lattice */
+function fibonacciSphere(n) {
+  const points = [];
+  const phi = Math.PI * (3 - Math.sqrt(5));
+  for (let i = 0; i < n; i++) {
+    const y = 1 - (i / (n - 1)) * 2;
+    const radius = Math.sqrt(1 - y * y);
+    const theta = phi * i;
+    points.push({
+      x: Math.cos(theta) * radius,
+      y: y,
+      z: Math.sin(theta) * radius
+    });
+  }
+  return points;
+}
+
 function makeDots(n) {
-  return Array.from({length: n}, () => ({
-    x: Math.random()*W, y: Math.random()*H,
-    vx: (Math.random()-0.5)*2.5, vy: (Math.random()-0.5)*2.5,
-    r: Math.random()*2.5+1.5
+  const sphere = fibonacciSphere(n);
+  return Array.from({ length: n }, (_, i) => ({
+    x: Math.random() * W,
+    y: Math.random() * H,
+    vx: (Math.random() - 0.5) * 2.5,
+    vy: (Math.random() - 0.5) * 2.5,
+    r: Math.random() * 2.5 + 1.5,
+    sx: sphere[i].x,
+    sy: sphere[i].y,
+    sz: sphere[i].z
   }));
 }
+
+function easeInOut(t) {
+  return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+}
+
 function draw() {
-  ctx.clearRect(0,0,W,H);
+  const elapsed = (performance.now() - startTime) / 1000;
+  const cycle = elapsed % 26;        // 26-second loop
+  const cx = W / 2, cy = H / 2;
+  const globeR = Math.min(W, H) * 0.32;
+  const rotY = elapsed * 0.4;        // continuous rotation
+  const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
+
+  /* Determine animation blend factor:
+     0 = pure neural network, 1 = pure globe */
+  let blend = 0;
+  if (cycle < 8)        blend = 0;                        // network
+  else if (cycle < 12)  blend = easeInOut((cycle - 8) / 4);  // morph in
+  else if (cycle < 22)  blend = 1;                        // globe
+  else                  blend = 1 - easeInOut((cycle - 22) / 4); // morph out
+
+  ctx.clearRect(0, 0, W, H);
+
+  /* ----- Update free-floating positions ----- */
+  for (const d of dots) {
+    d.x += d.vx;
+    d.y += d.vy;
+    if (d.x < 0 || d.x > W) d.vx *= -1;
+    if (d.y < 0 || d.y > H) d.vy *= -1;
+  }
+
+  /* ----- Compute display positions (blend network ↔ globe) ----- */
+  const display = dots.map(d => {
+    /* rotate sphere point around Y axis */
+    const rx = d.sx * cosY + d.sz * sinY;
+    const rz = -d.sx * sinY + d.sz * cosY;
+    const ry = d.sy;
+    const gx = cx + rx * globeR;
+    const gy = cy + ry * globeR;
+    return {
+      x: d.x * (1 - blend) + gx * blend,
+      y: d.y * (1 - blend) + gy * blend,
+      z: rz,                    // depth (only used in globe phase)
+      r: d.r,
+      visible: blend < 0.5 || rz > -0.2   // hide back hemisphere when globe-y
+    };
+  });
+
+  /* ----- Draw connections ----- */
   const maxDist = 140;
-  for(let i=0;i<dots.length;i++){
-    const d = dots[i];
-    d.x += d.vx; d.y += d.vy;
-    if(d.x<0||d.x>W) d.vx*=-1;
-    if(d.y<0||d.y>H) d.vy*=-1;
-    ctx.beginPath();
-    ctx.arc(d.x,d.y,d.r,0,Math.PI*2);
-    ctx.fillStyle='rgba(14,244,200,0.7)';
-    ctx.fill();
-    for(let j=i+1;j<dots.length;j++){
-      const b=dots[j];
-      const dx=d.x-b.x, dy=d.y-b.y;
-      const dist=Math.sqrt(dx*dx+dy*dy);
-      if(dist<maxDist){
+  for (let i = 0; i < display.length; i++) {
+    const a = display[i];
+    if (!a.visible) continue;
+    for (let j = i + 1; j < display.length; j++) {
+      const b = display[j];
+      if (!b.visible) continue;
+      const dx = a.x - b.x, dy = a.y - b.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < maxDist) {
         ctx.beginPath();
-        ctx.moveTo(d.x,d.y);
-        ctx.lineTo(b.x,b.y);
-        ctx.strokeStyle=`rgba(14,244,200,${0.55*(1-dist/maxDist)})`;
-        ctx.lineWidth=1.8;
+        if (blend > 0.5 && Math.random() < 0.6) {
+          /* curved arc connection in globe mode */
+          const mx = (a.x + b.x) / 2;
+          const my = (a.y + b.y) / 2 - dist * 0.25;
+          ctx.moveTo(a.x, a.y);
+          ctx.quadraticCurveTo(mx, my, b.x, b.y);
+        } else {
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+        }
+        ctx.strokeStyle = `rgba(14,244,200,${0.55 * (1 - dist / maxDist)})`;
+        ctx.lineWidth = 1.5;
         ctx.stroke();
       }
     }
   }
+
+  /* ----- Draw dots on top ----- */
+  for (const p of display) {
+    if (!p.visible) continue;
+    /* Slight depth-based size + brightness in globe mode */
+    const depthScale = blend > 0 ? (0.6 + 0.4 * ((p.z + 1) / 2)) : 1;
+    const alpha = 0.7 * depthScale;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r * depthScale, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(14,244,200,${alpha})`;
+    ctx.fill();
+  }
+
   requestAnimationFrame(draw);
 }
+
 resize();
-dots = makeDots(60);
+dots = makeDots(NUM_DOTS);
+startTime = performance.now();
 draw();
-window.addEventListener('resize', ()=>{ resize(); dots=makeDots(60); });
+window.addEventListener('resize', () => { resize(); dots = makeDots(NUM_DOTS); });
 </script>
 </body>
 </html>
