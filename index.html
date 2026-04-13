@@ -286,6 +286,68 @@ section { padding: 5rem 2rem; }
 .edu-year { font-family: 'DM Mono', monospace; font-size: 0.68rem; color: var(--muted); letter-spacing: 0.08em; margin-bottom: 0.8rem; }
 .edu-courses { font-size: 0.78rem; color: var(--text2); line-height: 1.7; }
 
+/* BOOKSHELF */
+.book-card {
+  flex-shrink: 0;
+  width: 160px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  transition: all 0.3s;
+  display: flex;
+  flex-direction: column;
+}
+.book-card:hover {
+  border-color: var(--teal);
+  transform: translateY(-4px);
+  box-shadow: var(--glow);
+}
+.book-cover {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  display: block;
+  border-bottom: 1px solid var(--border);
+}
+.book-meta {
+  padding: 0.7rem 0.8rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 80px;
+}
+.book-title {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--white);
+  line-height: 1.35;
+  margin-bottom: 0.4rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.book-author {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.58rem;
+  color: var(--teal2);
+  letter-spacing: 0.04em;
+  line-height: 1.4;
+}
+.book-tag {
+  display: inline-block;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.55rem;
+  padding: 0.15rem 0.45rem;
+  background: rgba(14,244,200,0.08);
+  color: var(--teal);
+  border-radius: 2px;
+  margin-top: 0.4rem;
+  letter-spacing: 0.05em;
+}
+
 /* CONTACT */
 .contact-section { background: var(--bg2); border-top: 1px solid var(--border); }
 .contact-inner { max-width: 700px; margin: 0 auto; text-align: center; }
@@ -321,6 +383,7 @@ footer span { color: var(--teal); }
     <li><a href="#experience">Experience</a></li>
     <li><a href="#education">Education</a></li>
     <li><a href="#hobby">Hobby</a></li>
+    <li><a href="#bookshelf">Reading</a></li>
     <li><a href="#contact">Contact</a></li>
   </ul>
 </nav>
@@ -959,6 +1022,245 @@ footer span { color: var(--teal); }
   </div>
   <div class="section-inner reveal" style="text-align:center;">
     <a href="https://github.com/Abdullah-TU/My-Paintings" target="_blank" class="btn-ghost">View Full Gallery →</a>
+  </div>
+</section>
+<div class="section-inner reveal" style="text-align:center;">
+    <a href="https://github.com/Abdullah-TU/My-Paintings" target="_blank" class="btn-ghost">View Full Gallery →</a>
+  </div>
+</section>
+<!-- ⑥.5 READING SHELF -->
+<section id="bookshelf">
+  <div class="section-inner">
+    <div class="reveal">
+      <div class="section-label">Always Learning</div>
+      <h2 class="section-title">📚 Reading Shelf</h2>
+      <p class="section-desc">Books currently on my desk — machine learning, deep learning, generative AI, and the craft of data science.</p>
+    </div>
+  </div>
+
+  <div class="slider-wrapper reveal" style="margin-top:1rem;">
+    <div class="slider-track" style="animation-duration:45s;">
+
+      <!-- BOOK 1 -->
+      <div class="book-card">
+        <img class="book-cover" src="https://content.packt.com/B21810/cover_image_large.jpg" alt="Machine Learning with PyTorch and Scikit-Learn">
+        <div class="book-meta">
+          <div class="book-title">Machine Learning with PyTorch and Scikit-Learn</div>
+          <div class="book-author">Sebastian Raschka · Yuxi Liu · Vahid Mirjalili</div>
+          <span class="book-tag">Core ML</span>
+        </div>
+      </div>
+
+      <!-- BOOK 2 -->
+      <div class="book-card">
+        <img class="book-cover" src="https://content.packt.com/B15892/cover_image_large.jpg" alt="Data Science Projects with Python">
+        <div class="book-meta">
+          <div class="book-title">Data Science Projects with Python</div>
+          <div class="book-author">Stephen Klosterman</div>
+          <span class="book-tag">Case Studies</span>
+        </div>
+      </div>
+
+      <!-- BOOK 3 -->
+      <div class="book-card">
+        <img class="book-cover" src="https://content.packt.com/B22495/cover_image_large.jpg" alt="Mastering PyTorch - Second Edition">
+        <div class="book-meta">
+          <div class="book-title">Mastering PyTorch — 2nd Edition</div>
+          <div class="book-author">Ashish Ranjan Jha</div>
+          <span class="book-tag">Deep Learning</span>
+        </div>
+      </div>
+
+      <!-- BOOK 4 -->
+      <div class="book-card">
+        <img class="book-cover" src="https://content.packt.com/B21601/cover_image_large.jpg" alt="Modern Computer Vision with PyTorch">
+        <div class="book-meta">
+          <div class="book-title">Modern Computer Vision with PyTorch — 2E</div>
+          <div class="book-author">V. Kishore Ayyadevara · Yeshwanth Reddy</div>
+          <span class="book-tag">Computer Vision</span>
+        </div>
+      </div>
+
+      <!-- BOOK 5 -->
+      <div class="book-card">
+        <img class="book-cover" src="https://content.packt.com/B22495/cover_image_large.jpg" alt="Mastering NLP from Foundations to LLMs">
+        <div class="book-meta">
+          <div class="book-title">Mastering NLP from Foundations to LLMs</div>
+          <div class="book-author">Lior Gazit · Meysam Ghaffari</div>
+          <span class="book-tag">NLP</span>
+        </div>
+      </div>
+
+      <!-- BOOK 6 -->
+      <div class="book-card">
+        <img class="book-cover" src="https://content.packt.com/B21432/cover_image_large.jpg" alt="Transformers for Natural Language Processing">
+        <div class="book-meta">
+          <div class="book-title">Transformers for Natural Language Processing</div>
+          <div class="book-author">Denis Rothman</div>
+          <span class="book-tag">Transformers</span>
+        </div>
+      </div>
+
+      <!-- BOOK 7 -->
+      <div class="book-card">
+        <img class="book-cover" src="https://content.packt.com/B21801/cover_image_large.jpg" alt="Generative AI with LangChain">
+        <div class="book-meta">
+          <div class="book-title">Generative AI with LangChain — 2E</div>
+          <div class="book-author">Ben Auffarth</div>
+          <span class="book-tag">GenAI</span>
+        </div>
+      </div>
+
+      <!-- BOOK 8 -->
+      <div class="book-card">
+        <img class="book-cover" src="https://content.packt.com/B22571/cover_image_large.jpg" alt="RAG-Driven Generative AI">
+        <div class="book-meta">
+          <div class="book-title">RAG-Driven Generative AI</div>
+          <div class="book-author">Denis Rothman</div>
+          <span class="book-tag">RAG</span>
+        </div>
+      </div>
+
+      <!-- BOOK 9 -->
+      <div class="book-card">
+        <img class="book-cover" src="https://content.packt.com/B22495/cover_image_large.jpg" alt="LLM Engineer's Handbook">
+        <div class="book-meta">
+          <div class="book-title">LLM Engineer's Handbook</div>
+          <div class="book-author">Paul Iusztin · Maxime Labonne</div>
+          <span class="book-tag">LLMOps</span>
+        </div>
+      </div>
+
+      <!-- BOOK 10 -->
+      <div class="book-card">
+        <img class="book-cover" src="https://content.packt.com/B21434/cover_image_large.jpg" alt="Building LLM Powered Applications">
+        <div class="book-meta">
+          <div class="book-title">Building LLM Powered Applications</div>
+          <div class="book-author">Valentina Alto</div>
+          <span class="book-tag">Applications</span>
+        </div>
+      </div>
+
+      <!-- BOOK 11 -->
+      <div class="book-card">
+        <img class="book-cover" src="https://content.packt.com/B22495/cover_image_large.jpg" alt="Building Agentic AI Systems">
+        <div class="book-meta">
+          <div class="book-title">Building Agentic AI Systems</div>
+          <div class="book-author">Anjanava Biswas · Wrick Talukdar</div>
+          <span class="book-tag">Agents</span>
+        </div>
+      </div>
+
+      <!-- BOOK 12 -->
+      <div class="book-card">
+        <img class="book-cover" src="https://content.packt.com/B20996/cover_image_large.jpg" alt="Learn Python Programming">
+        <div class="book-meta">
+          <div class="book-title">Learn Python Programming — 4E</div>
+          <div class="book-author">Fabrizio Romano · Heinrich Kruger</div>
+          <span class="book-tag">Python</span>
+        </div>
+      </div>
+
+      <!-- ========== DUPLICATES FOR SEAMLESS LOOP ========== -->
+
+      <div class="book-card">
+        <img class="book-cover" src="https://content.packt.com/B21810/cover_image_large.jpg" alt="Machine Learning with PyTorch and Scikit-Learn">
+        <div class="book-meta">
+          <div class="book-title">Machine Learning with PyTorch and Scikit-Learn</div>
+          <div class="book-author">Sebastian Raschka · Yuxi Liu · Vahid Mirjalili</div>
+          <span class="book-tag">Core ML</span>
+        </div>
+      </div>
+      <div class="book-card">
+        <img class="book-cover" src="https://content.packt.com/B15892/cover_image_large.jpg" alt="Data Science Projects with Python">
+        <div class="book-meta">
+          <div class="book-title">Data Science Projects with Python</div>
+          <div class="book-author">Stephen Klosterman</div>
+          <span class="book-tag">Case Studies</span>
+        </div>
+      </div>
+      <div class="book-card">
+        <img class="book-cover" src="https://content.packt.com/B22495/cover_image_large.jpg" alt="Mastering PyTorch - Second Edition">
+        <div class="book-meta">
+          <div class="book-title">Mastering PyTorch — 2nd Edition</div>
+          <div class="book-author">Ashish Ranjan Jha</div>
+          <span class="book-tag">Deep Learning</span>
+        </div>
+      </div>
+      <div class="book-card">
+        <img class="book-cover" src="https://content.packt.com/B21601/cover_image_large.jpg" alt="Modern Computer Vision with PyTorch">
+        <div class="book-meta">
+          <div class="book-title">Modern Computer Vision with PyTorch — 2E</div>
+          <div class="book-author">V. Kishore Ayyadevara · Yeshwanth Reddy</div>
+          <span class="book-tag">Computer Vision</span>
+        </div>
+      </div>
+      <div class="book-card">
+        <img class="book-cover" src="https://content.packt.com/B22495/cover_image_large.jpg" alt="Mastering NLP from Foundations to LLMs">
+        <div class="book-meta">
+          <div class="book-title">Mastering NLP from Foundations to LLMs</div>
+          <div class="book-author">Lior Gazit · Meysam Ghaffari</div>
+          <span class="book-tag">NLP</span>
+        </div>
+      </div>
+      <div class="book-card">
+        <img class="book-cover" src="https://content.packt.com/B21432/cover_image_large.jpg" alt="Transformers for Natural Language Processing">
+        <div class="book-meta">
+          <div class="book-title">Transformers for Natural Language Processing</div>
+          <div class="book-author">Denis Rothman</div>
+          <span class="book-tag">Transformers</span>
+        </div>
+      </div>
+      <div class="book-card">
+        <img class="book-cover" src="https://content.packt.com/B21801/cover_image_large.jpg" alt="Generative AI with LangChain">
+        <div class="book-meta">
+          <div class="book-title">Generative AI with LangChain — 2E</div>
+          <div class="book-author">Ben Auffarth</div>
+          <span class="book-tag">GenAI</span>
+        </div>
+      </div>
+      <div class="book-card">
+        <img class="book-cover" src="https://content.packt.com/B22571/cover_image_large.jpg" alt="RAG-Driven Generative AI">
+        <div class="book-meta">
+          <div class="book-title">RAG-Driven Generative AI</div>
+          <div class="book-author">Denis Rothman</div>
+          <span class="book-tag">RAG</span>
+        </div>
+      </div>
+      <div class="book-card">
+        <img class="book-cover" src="https://content.packt.com/B22495/cover_image_large.jpg" alt="LLM Engineer's Handbook">
+        <div class="book-meta">
+          <div class="book-title">LLM Engineer's Handbook</div>
+          <div class="book-author">Paul Iusztin · Maxime Labonne</div>
+          <span class="book-tag">LLMOps</span>
+        </div>
+      </div>
+      <div class="book-card">
+        <img class="book-cover" src="https://content.packt.com/B21434/cover_image_large.jpg" alt="Building LLM Powered Applications">
+        <div class="book-meta">
+          <div class="book-title">Building LLM Powered Applications</div>
+          <div class="book-author">Valentina Alto</div>
+          <span class="book-tag">Applications</span>
+        </div>
+      </div>
+      <div class="book-card">
+        <img class="book-cover" src="https://content.packt.com/B22495/cover_image_large.jpg" alt="Building Agentic AI Systems">
+        <div class="book-meta">
+          <div class="book-title">Building Agentic AI Systems</div>
+          <div class="book-author">Anjanava Biswas · Wrick Talukdar</div>
+          <span class="book-tag">Agents</span>
+        </div>
+      </div>
+      <div class="book-card">
+        <img class="book-cover" src="https://content.packt.com/B20996/cover_image_large.jpg" alt="Learn Python Programming">
+        <div class="book-meta">
+          <div class="book-title">Learn Python Programming — 4E</div>
+          <div class="book-author">Fabrizio Romano · Heinrich Kruger</div>
+          <span class="book-tag">Python</span>
+        </div>
+      </div>
+
+    </div>
   </div>
 </section>
 <!-- ⑦ CONTACT -->
