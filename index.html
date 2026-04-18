@@ -445,13 +445,13 @@ footer span { color: var(--teal); }
   <div class="slider-wrapper reveal">
     <div class="slider-track">
       <div class="skill-chip">🐍 Python</div><div class="skill-chip">📊 R</div>
-      <div class="skill-chip">☕ Java</div><div class="skill-chip">🌐 JavaScript</div>
+      <div class="skill-chip">☕ Java</div><div class="skill-chip">🌐 Java</div>
       <div class="skill-chip">🤖 TensorFlow</div><div class="skill-chip">🔥 PyTorch</div>
       <div class="skill-chip">🧠 Scikit-learn</div><div class="skill-chip">📈 NumPy / Pandas</div>
       <div class="skill-chip">🗺️ QGIS</div><div class="skill-chip">📉 Power BI</div>
       <div class="skill-chip">☁️ Microsoft Azure</div><div class="skill-chip">🗄️ SQL / PostgreSQL</div>
       <div class="skill-chip">🐍 Python</div><div class="skill-chip">📊 R</div>
-      <div class="skill-chip">☕ Java</div><div class="skill-chip">🌐 JavaScript</div>
+      <div class="skill-chip">☕ Java</div><div class="skill-chip">🌐 Java</div>
       <div class="skill-chip">🤖 TensorFlow</div><div class="skill-chip">🔥 PyTorch</div>
       <div class="skill-chip">🧠 Scikit-learn</div><div class="skill-chip">📈 NumPy / Pandas</div>
       <div class="skill-chip">🗺️ QGIS</div><div class="skill-chip">📉 Power BI</div>
@@ -865,7 +865,7 @@ footer span { color: var(--teal); }
       <a class="project-card" href="https://github.com/Abdullah-TU/Research-Publications" target="_blank">
         <div class="project-icon">📄</div>
         <div class="project-name">Research &amp; Publications</div>
-        <div class="project-desc">Repository of all peer-reviewed publications, manuscripts, and supplementary materials from environmental data science research.</div>
+        <div class="project-desc">Repository of all peer-reviewed publications, manus, and supplementary materials from environmental data science research.</div>
         <span class="project-tag">XAI</span><span class="project-tag">Environmental ML</span>
         <div class="project-arrow">→ View on GitHub</div>
       </a>
@@ -1405,6 +1405,18 @@ footer span { color: var(--teal); }
   <span>Md. Abdullah-Al Mamun</span> · Data Scientist &amp; Researcher · Salo, Finland · 2026
 </footer>
 <script>
+// ================================================================
+//  HERO CANVAS ANIMATION — 7-Phase Scientific Loop
+//
+//  Phase 1 — Neural Network
+//  Phase 2 — Globe + Satellites
+//  Phase 3 — DNA Helix
+//  Phase 4 — Microscope
+//  Phase 5 — Filled Bar Chart / Trend
+//  Phase 6 — AI Circular Symbol
+//  Phase 7 — ECG Heartbeat
+// ================================================================
+
 /* ============================================================
    UI INTERACTIONS
 ============================================================ */
@@ -1423,805 +1435,622 @@ const observer = new IntersectionObserver(entries => {
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
 /* ============================================================
-   HERO CANVAS ANIMATION
-   Sequence:
-   1. Neural network
-   2. Globe + orbiting satellites
-   3. DNA helix
-   4. Microscope silhouette
-   5. Bar chart / rising trend
-   6. AI circular tech motif
-   7. Heartbeat / ECG
-   8. Back to neural network
+   CANVAS SETUP
 ============================================================ */
 const canvas = document.getElementById('neural');
 const ctx = canvas.getContext('2d');
 
-let W, H, CX, CY;
-let particles = [];
-let startTime = 0;
-let satelliteImg = new Image();
-satelliteImg.src = "https://www.clipartmax.com/png/middle/260-2609549_weather-satellite-png-satellite-clipart.png";
+let W, H, CX, CY, dots, startTime;
+const NUM_DOTS = 100;
+const CYCLE = 76;
 
-const NUM_PARTICLES = 140;
-const DOT_COLOR = '14,244,200';
-const SOFT_COLOR = '170,225,255';
-
-const PHASES = [
-  { name: 'network',    duration: 7.0 },
-  { name: 'globe',      duration: 6.0 },
-  { name: 'dna',        duration: 5.0 },
-  { name: 'microscope', duration: 5.2 },
-  { name: 'chart',      duration: 4.8 },
-  { name: 'ai',         duration: 5.2 },
-  { name: 'heartbeat',  duration: 4.6 }
-];
-const TOTAL_DURATION = PHASES.reduce((a, b) => a + b.duration, 0);
-
-function resizeCanvas() {
+function resize() {
   W = canvas.width = canvas.offsetWidth;
   H = canvas.height = canvas.offsetHeight;
   CX = W / 2;
   CY = H / 2;
 }
-resizeCanvas();
 
-function rand(min, max) { return min + Math.random() * (max - min); }
-function lerp(a, b, t) { return a + (b - a) * t; }
-function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
 function easeInOut(t) {
   return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
 }
-function easeOutCubic(t) {
-  return 1 - Math.pow(1 - t, 3);
-}
-function dist(ax, ay, bx, by) {
-  const dx = ax - bx, dy = ay - by;
-  return Math.sqrt(dx * dx + dy * dy);
+
+function clamp(v, min, max) {
+  return Math.max(min, Math.min(max, v));
 }
 
-/* ============================================================
-   PARTICLES
-============================================================ */
-function initParticles() {
-  particles = Array.from({ length: NUM_PARTICLES }, () => ({
-    x: rand(0, W),
-    y: rand(0, H),
-    vx: rand(-0.7, 0.7),
-    vy: rand(-0.7, 0.7),
-    r: rand(1.5, 3.0),
-    phaseOffset: Math.random() * Math.PI * 2,
-    twinkle: rand(0.2, 1.0)
-  }));
-}
-initParticles();
-
-/* ============================================================
-   PATH / SHAPE HELPERS
-============================================================ */
-function samplePolyline(points, totalSamples, closed = false) {
-  const segments = [];
-  let totalLen = 0;
-
-  for (let i = 0; i < points.length - 1; i++) {
-    const a = points[i], b = points[i + 1];
-    const len = dist(a.x, a.y, b.x, b.y);
-    segments.push({ a, b, len });
-    totalLen += len;
-  }
-
-  if (closed && points.length > 2) {
-    const a = points[points.length - 1], b = points[0];
-    const len = dist(a.x, a.y, b.x, b.y);
-    segments.push({ a, b, len });
-    totalLen += len;
-  }
-
-  const out = [];
-  for (let s = 0; s < totalSamples; s++) {
-    const target = (s / Math.max(1, totalSamples - 1)) * totalLen;
-    let acc = 0;
-    for (const seg of segments) {
-      if (acc + seg.len >= target) {
-        const t = seg.len === 0 ? 0 : (target - acc) / seg.len;
-        out.push({
-          x: lerp(seg.a.x, seg.b.x, t),
-          y: lerp(seg.a.y, seg.b.y, t)
-        });
-        break;
-      }
-      acc += seg.len;
-    }
-  }
-  return out;
-}
-
-function sampleCircle(cx, cy, r, n, start = 0, end = Math.PI * 2) {
-  const pts = [];
-  for (let i = 0; i < n; i++) {
-    const t = i / Math.max(1, n - 1);
-    const a = start + (end - start) * t;
-    pts.push({
-      x: cx + Math.cos(a) * r,
-      y: cy + Math.sin(a) * r
-    });
-  }
-  return pts;
-}
-
-function sampleEllipse(cx, cy, rx, ry, n, start = 0, end = Math.PI * 2) {
-  const pts = [];
-  for (let i = 0; i < n; i++) {
-    const t = i / Math.max(1, n - 1);
-    const a = start + (end - start) * t;
-    pts.push({
-      x: cx + Math.cos(a) * rx,
-      y: cy + Math.sin(a) * ry
-    });
-  }
-  return pts;
+function lerp(a, b, t) {
+  return a + (b - a) * t;
 }
 
 /* ============================================================
-   TARGET SHAPES (normalized around center)
+   SHAPE GENERATORS  (coords in -1..1 space)
 ============================================================ */
-function getDNAPoints(n, tGlobal) {
+
+/* ── Globe: Fibonacci sphere ──────────────────────────────── */
+function fibonacciSphere(n) {
   const pts = [];
-  const turns = 2.25;
-  const height = Math.min(W, H) * 0.62;
-  const amp = Math.min(W, H) * 0.11;
-  const centerX = CX;
-  const centerY = CY;
-  const rows = Math.floor(n / 2);
-
-  for (let i = 0; i < rows; i++) {
-    const p = i / Math.max(1, rows - 1);
-    const y = centerY - height / 2 + p * height;
-    const a = p * Math.PI * 2 * turns + tGlobal * 1.2;
-    const x1 = centerX + Math.sin(a) * amp;
-    const x2 = centerX - Math.sin(a) * amp;
-    pts.push({ x: x1, y });
-    pts.push({ x: x2, y });
-
-    if (i % 4 === 0) {
-      const rungCount = 2;
-      for (let k = 1; k <= rungCount; k++) {
-        const rt = k / (rungCount + 1);
-        pts.push({
-          x: lerp(x1, x2, rt),
-          y: y
-        });
-      }
-    }
-  }
-
-  return pts.slice(0, n);
-}
-
-function getMicroscopePoints(n) {
-  const pts = [];
-  const s = Math.min(W, H) * 0.26;
-  const ox = CX;
-  const oy = CY + s * 0.04;
-
-  const parts = [];
-
-  // Base
-  parts.push(...samplePolyline([
-    { x: ox - s * 0.65, y: oy + s * 0.72 },
-    { x: ox + s * 0.55, y: oy + s * 0.72 }
-  ], 12));
-
-  // Lower support
-  parts.push(...samplePolyline([
-    { x: ox - s * 0.28, y: oy + s * 0.72 },
-    { x: ox - s * 0.05, y: oy + s * 0.28 }
-  ], 10));
-
-  // Curved arm approximation
-  parts.push(...samplePolyline([
-    { x: ox - s * 0.08, y: oy + s * 0.25 },
-    { x: ox - s * 0.20, y: oy - s * 0.02 },
-    { x: ox - s * 0.08, y: oy - s * 0.35 },
-    { x: ox + s * 0.18, y: oy - s * 0.30 }
-  ], 28));
-
-  // Tube
-  parts.push(...samplePolyline([
-    { x: ox + s * 0.08, y: oy - s * 0.55 },
-    { x: ox + s * 0.28, y: oy - s * 0.25 }
-  ], 10));
-
-  // Eyepiece
-  parts.push(...samplePolyline([
-    { x: ox + s * 0.02, y: oy - s * 0.63 },
-    { x: ox + s * 0.12, y: oy - s * 0.53 }
-  ], 6));
-
-  // Stage
-  parts.push(...samplePolyline([
-    { x: ox - s * 0.10, y: oy + s * 0.02 },
-    { x: ox + s * 0.30, y: oy + s * 0.02 }
-  ], 10));
-
-  // Objective lens
-  parts.push(...samplePolyline([
-    { x: ox + s * 0.16, y: oy - s * 0.08 },
-    { x: ox + s * 0.23, y: oy + s * 0.05 }
-  ], 6));
-
-  // Focus knob circles
-  parts.push(...sampleCircle(ox - s * 0.02, oy - s * 0.03, s * 0.08, 12));
-  parts.push(...sampleCircle(ox + s * 0.08, oy + s * 0.10, s * 0.05, 8));
-
-  // Small sample slide
-  parts.push(...samplePolyline([
-    { x: ox + s * 0.02, y: oy - s * 0.02 },
-    { x: ox + s * 0.16, y: oy - s * 0.08 }
-  ], 7));
-
-  for (let i = 0; i < parts.length; i++) pts.push(parts[i]);
-
-  while (pts.length < n) {
-    pts.push({
-      x: ox + rand(-s * 0.08, s * 0.08),
-      y: oy + rand(-s * 0.08, s * 0.08)
-    });
-  }
-
-  return pts.slice(0, n);
-}
-
-function getChartPoints(n) {
-  const pts = [];
-  const w = Math.min(W, H) * 0.62;
-  const h = Math.min(W, H) * 0.34;
-  const left = CX - w / 2;
-  const bottom = CY + h / 2;
-
-  // axes
-  pts.push(...samplePolyline([
-    { x: left, y: bottom - h },
-    { x: left, y: bottom },
-    { x: left + w, y: bottom }
-  ], 24));
-
-  // bars
-  const barWidths = [0.10, 0.10, 0.10, 0.10, 0.10];
-  const barHeights = [0.22, 0.38, 0.30, 0.60, 0.78];
-  let xCursor = left + w * 0.12;
-
-  for (let i = 0; i < barWidths.length; i++) {
-    const bw = w * barWidths[i];
-    const bh = h * barHeights[i];
-    const x = xCursor;
-    const y = bottom - bh;
-    pts.push(...samplePolyline([
-      { x, y: bottom },
-      { x, y },
-      { x: x + bw, y },
-      { x: x + bw, y: bottom }
-    ], 14, false));
-    xCursor += w * 0.16;
-  }
-
-  // rising trend line
-  const linePts = [
-    { x: left + w * 0.12, y: bottom - h * 0.22 },
-    { x: left + w * 0.28, y: bottom - h * 0.36 },
-    { x: left + w * 0.44, y: bottom - h * 0.32 },
-    { x: left + w * 0.62, y: bottom - h * 0.57 },
-    { x: left + w * 0.82, y: bottom - h * 0.80 }
-  ];
-  pts.push(...samplePolyline(linePts, 30));
-  pts.push(...samplePolyline([
-    { x: left + w * 0.82, y: bottom - h * 0.80 },
-    { x: left + w * 0.88, y: bottom - h * 0.90 }
-  ], 8));
-
-  while (pts.length < n) {
-    const rp = linePts[Math.floor(Math.random() * linePts.length)];
-    pts.push({
-      x: rp.x + rand(-8, 8),
-      y: rp.y + rand(-8, 8)
-    });
-  }
-
-  return pts.slice(0, n);
-}
-
-function getAIPoints(n) {
-  const pts = [];
-  const r = Math.min(W, H) * 0.22;
-  const inner = r * 0.74;
-  const centerX = CX;
-  const centerY = CY;
-
-  pts.push(...sampleCircle(centerX, centerY, r, 34));
-  pts.push(...sampleCircle(centerX, centerY, inner, 26));
-  pts.push(...sampleCircle(centerX, centerY, r * 1.14, 20, Math.PI * 0.18, Math.PI * 1.82));
-
-  // tech spokes
-  const spokeAngles = [-0.85, -0.45, 0, 0.45, 0.85, 2.3, 2.75, 3.15, 3.65, 4.15];
-  spokeAngles.forEach(a => {
-    const x1 = centerX + Math.cos(a) * (inner + 8);
-    const y1 = centerY + Math.sin(a) * (inner + 8);
-    const x2 = centerX + Math.cos(a) * (r * 1.45);
-    const y2 = centerY + Math.sin(a) * (r * 1.45);
-    pts.push(...samplePolyline([{ x: x1, y: y1 }, { x: x2, y: y2 }], 5));
-  });
-
-  // central AI letters approximated
-  const s = r * 0.75;
-
-  // A
-  pts.push(...samplePolyline([
-    { x: centerX - s * 0.40, y: centerY + s * 0.34 },
-    { x: centerX - s * 0.18, y: centerY - s * 0.34 },
-    { x: centerX + s * 0.02, y: centerY + s * 0.34 }
-  ], 16));
-  pts.push(...samplePolyline([
-    { x: centerX - s * 0.31, y: centerY + s * 0.05 },
-    { x: centerX - s * 0.07, y: centerY + s * 0.05 }
-  ], 6));
-
-  // I
-  pts.push(...samplePolyline([
-    { x: centerX + s * 0.18, y: centerY - s * 0.34 },
-    { x: centerX + s * 0.18, y: centerY + s * 0.34 }
-  ], 10));
-
-  while (pts.length < n) {
-    const a = Math.random() * Math.PI * 2;
-    const rr = rand(inner * 0.35, inner * 0.95);
-    pts.push({
-      x: centerX + Math.cos(a) * rr,
-      y: centerY + Math.sin(a) * rr
-    });
-  }
-
-  return pts.slice(0, n);
-}
-
-function getHeartbeatPoints(n, timePhase) {
-  const pts = [];
-  const w = Math.min(W, H) * 0.82;
-  const left = CX - w / 2;
-  const y = CY;
-  const amp = Math.min(W, H) * 0.12;
-
-  const base = [
-    { x: left + w * 0.00, y: y },
-    { x: left + w * 0.14, y: y },
-    { x: left + w * 0.20, y: y - amp * 0.25 },
-    { x: left + w * 0.23, y: y + amp * 0.18 },
-    { x: left + w * 0.26, y: y },
-    { x: left + w * 0.36, y: y },
-    { x: left + w * 0.42, y: y - amp * 0.55 },
-    { x: left + w * 0.45, y: y + amp * 0.95 },
-    { x: left + w * 0.49, y: y - amp * 1.45 },
-    { x: left + w * 0.53, y: y + amp * 0.52 },
-    { x: left + w * 0.57, y: y },
-    { x: left + w * 0.72, y: y },
-    { x: left + w * 0.79, y: y - amp * 0.35 },
-    { x: left + w * 0.83, y: y + amp * 0.20 },
-    { x: left + w * 0.87, y: y },
-    { x: left + w * 1.00, y: y }
-  ];
-
-  // subtle horizontal motion
-  const offset = Math.sin(timePhase * 2.2) * 10;
-  const moved = base.map(p => ({ x: p.x + offset, y: p.y }));
-
-  pts.push(...samplePolyline(moved, n));
-
-  return pts.slice(0, n);
-}
-
-/* ============================================================
-   GLOBE POINTS (3D)
-============================================================ */
-function fibonacciSpherePoints(n) {
-  const out = [];
   const phi = Math.PI * (3 - Math.sqrt(5));
   for (let i = 0; i < n; i++) {
     const y = 1 - (i / (n - 1)) * 2;
-    const radius = Math.sqrt(1 - y * y);
-    const theta = phi * i;
-    out.push({
-      x: Math.cos(theta) * radius,
-      y,
-      z: Math.sin(theta) * radius
+    const r = Math.sqrt(1 - y * y);
+    const t = phi * i;
+    pts.push({ x: Math.cos(t) * r, y, z: Math.sin(t) * r });
+  }
+  return pts;
+}
+
+/* ── DNA: keep elegant double helix ───────────────────────── */
+function dnaPoints(n) {
+  const pts = [];
+  const turns = 3.5;
+  const helixR = 0.36;
+  const nStrand = Math.floor(n * 0.38);
+  const nRungDots = n - nStrand * 2;
+  const nRungs = Math.floor(nRungDots / 3);
+
+  for (let i = 0; i < nStrand; i++) {
+    const t = (i / (nStrand - 1)) * turns * Math.PI * 2;
+    pts.push({
+      x: Math.sin(t) * helixR,
+      y: (i / (nStrand - 1)) * 1.80 - 0.90
     });
   }
-  return out;
-}
-const spherePoints = fibonacciSpherePoints(NUM_PARTICLES);
 
-function getGlobePoints(timeSec) {
-  const pts = [];
-  const globeR = Math.min(W, H) * 0.235;
-  const rot = timeSec * 0.55;
-  const cosR = Math.cos(rot);
-  const sinR = Math.sin(rot);
-
-  for (let i = 0; i < NUM_PARTICLES; i++) {
-    const p = spherePoints[i];
-    const rx = p.x * cosR + p.z * sinR;
-    const rz = -p.x * sinR + p.z * cosR;
-    const perspective = 0.74 + ((rz + 1) / 2) * 0.42;
+  for (let i = 0; i < nStrand; i++) {
+    const t = (i / (nStrand - 1)) * turns * Math.PI * 2 + Math.PI;
     pts.push({
-      x: CX + rx * globeR,
-      y: CY + p.y * globeR,
-      z: rz,
-      scale: perspective,
-      visible: rz > -0.55
+      x: Math.sin(t) * helixR,
+      y: (i / (nStrand - 1)) * 1.80 - 0.90
+    });
+  }
+
+  for (let r = 0; r < nRungs; r++) {
+    const frac = (r + 0.5) / nRungs;
+    const t = frac * turns * Math.PI * 2;
+    const xA = Math.sin(t) * helixR;
+    const xB = -Math.sin(t) * helixR;
+    const y = frac * 1.80 - 0.90;
+    pts.push({ x: xA, y });
+    pts.push({ x: (xA + xB) / 2, y });
+    pts.push({ x: xB, y });
+  }
+
+  const rem = n - pts.length;
+  for (let i = 0; i < rem; i++) {
+    const frac = i / Math.max(1, rem - 1);
+    const t = frac * turns * Math.PI * 2;
+    pts.push({
+      x: Math.sin(t + Math.PI / 2) * helixR * 0.55,
+      y: frac * 1.80 - 0.90
+    });
+  }
+
+  return pts;
+}
+
+/* ── Microscope silhouette ────────────────────────────────── */
+function microscopePoints(n) {
+  const segs = [
+    [-0.08,-0.88,  0.08,-0.88],
+    [-0.10,-0.88, -0.10,-0.72],
+    [ 0.10,-0.88,  0.10,-0.72],
+
+    [-0.10,-0.72, -0.22,-0.12],
+    [ 0.10,-0.72,  0.04,-0.12],
+    [-0.22,-0.12,  0.04,-0.12],
+
+    [ 0.04,-0.12,  0.16,-0.12],
+
+    [ 0.10,-0.12,  0.10, 0.08],
+    [ 0.10, 0.08,  0.18, 0.08],
+    [ 0.18, 0.08,  0.18, 0.24],
+    [ 0.18, 0.24,  0.10, 0.24],
+
+    [-0.50, 0.24,  0.50, 0.24],
+    [-0.50, 0.33,  0.50, 0.33],
+
+    [-0.28, 0.24, -0.28, 0.60],
+
+    [-0.42, 0.34, -0.42, 0.52],
+    [-0.50, 0.34, -0.50, 0.52],
+    [-0.42, 0.34, -0.50, 0.34],
+    [-0.42, 0.52, -0.50, 0.52],
+
+    [-0.08, 0.33, -0.08, 0.55],
+    [ 0.08, 0.33,  0.08, 0.55],
+    [-0.08, 0.55,  0.08, 0.55],
+
+    [-0.58, 0.60,  0.58, 0.60],
+    [-0.58, 0.60, -0.58, 0.78],
+    [ 0.58, 0.60,  0.58, 0.78],
+    [-0.58, 0.78,  0.58, 0.78],
+  ];
+
+  const lengths = segs.map(s => Math.hypot(s[2] - s[0], s[3] - s[1]));
+  const total = lengths.reduce((a, b) => a + b, 0);
+  const pts = [];
+
+  for (let i = 0; i < n; i++) {
+    let rem = (i / n) * total;
+    let cum = 0;
+    for (let s = 0; s < segs.length; s++) {
+      cum += lengths[s];
+      if (rem <= cum || s === segs.length - 1) {
+        const [x1, y1, x2, y2] = segs[s];
+        const tf = lengths[s] > 0 ? Math.min(1, (rem - (cum - lengths[s])) / lengths[s]) : 0.5;
+        pts.push({ x: x1 + tf * (x2 - x1), y: y1 + tf * (y2 - y1) });
+        break;
+      }
+    }
+  }
+  return pts;
+}
+
+/* ── Filled Bar Chart / Rising Trend ───────────────────────── */
+function barChartPoints(n) {
+  const pts = [];
+  const cols = 6;
+  const bH = [0.22, 0.38, 0.52, 0.64, 0.76, 0.90];
+  const bX = [-0.68, -0.42, -0.16, 0.10, 0.36, 0.62];
+  const baseY = 0.62;
+  const barW = 0.12;
+
+  const totalBarDots = Math.floor(n * 0.84);
+  const perBar = Math.floor(totalBarDots / cols);
+
+  for (let b = 0; b < cols; b++) {
+    const topY = baseY - bH[b] * 1.35;
+
+    for (let i = 0; i < perBar; i++) {
+      const gx = i % 4;
+      const gy = Math.floor(i / 4);
+      const colsInBar = 4;
+      const rowsInBar = Math.max(3, Math.ceil(perBar / colsInBar));
+
+      const px = bX[b] - barW / 2 + (gx / (colsInBar - 1)) * barW;
+      const py = baseY - (gy / (rowsInBar - 1)) * (baseY - topY);
+
+      pts.push({
+        x: px + (Math.random() - 0.5) * 0.012,
+        y: py + (Math.random() - 0.5) * 0.012
+      });
+    }
+  }
+
+  const axisDots = Math.floor(n * 0.07);
+  for (let i = 0; i < axisDots; i++) {
+    pts.push({
+      x: -0.78 + (i / Math.max(1, axisDots - 1)) * 1.56,
+      y: baseY + 0.06
+    });
+  }
+
+  const trendStart = pts.length;
+  const trendDots = Math.max(0, n - trendStart);
+
+  for (let i = 0; i < trendDots; i++) {
+    const t = i / Math.max(1, trendDots - 1);
+    const idx = t * (cols - 1);
+    const bi = Math.min(Math.floor(idx), cols - 2);
+    const bf = idx - bi;
+    const h = bH[bi] * (1 - bf) + bH[bi + 1] * bf;
+
+    pts.push({
+      x: bX[0] + t * (bX[cols - 1] - bX[0]),
+      y: baseY - h * 1.35 - 0.08 + (Math.random() - 0.5) * 0.02
+    });
+  }
+
+  return pts.slice(0, n);
+}
+
+/* ── AI Circular Motif ─────────────────────────────────────── */
+function aiPoints(n) {
+  const pts = [];
+  const rings = [
+    { r: 0.84, n: Math.floor(n * 0.22) },
+    { r: 0.58, n: Math.floor(n * 0.15) },
+    { r: 0.22, n: Math.floor(n * 0.08) }
+  ];
+
+  for (const ring of rings) {
+    for (let i = 0; i < ring.n; i++) {
+      const a = (i / ring.n) * Math.PI * 2;
+      pts.push({ x: Math.cos(a) * ring.r, y: Math.sin(a) * ring.r });
+    }
+  }
+
+  const spokes = 8;
+  const dotsPerSpoke = Math.floor(n * 0.28 / spokes);
+  for (let s = 0; s < spokes; s++) {
+    const angle = (s / spokes) * Math.PI * 2;
+    for (let i = 0; i < dotsPerSpoke; i++) {
+      const t = 0.24 + (i / dotsPerSpoke) * 0.58;
+      pts.push({ x: Math.cos(angle) * t, y: Math.sin(angle) * t });
+    }
+  }
+
+  const nodeN = n - pts.length;
+  for (let i = 0; i < nodeN; i++) {
+    const a = (i / nodeN) * Math.PI * 2 + Math.PI / spokes;
+    const r = 0.70 + (Math.sin(i * 1.618) * 0.5 + 0.5) * 0.06;
+    pts.push({ x: Math.cos(a) * r, y: Math.sin(a) * r });
+  }
+
+  return pts;
+}
+
+/* ── ECG / Heartbeat waveform ──────────────────────────────── */
+function ecgPoints(n) {
+  function ecgY(x) {
+    if (x < 0.10) return  Math.sin(x / 0.10 * Math.PI) * 0.07;
+    if (x < 0.25) return  0;
+    if (x < 0.30) return -Math.sin((x - 0.25) / 0.05 * Math.PI) * 0.18;
+    if (x < 0.35) return  Math.sin((x - 0.30) / 0.05 * Math.PI) * 1.00;
+    if (x < 0.42) return -Math.sin((x - 0.35) / 0.07 * Math.PI) * 0.14;
+    if (x < 0.58) return  0;
+    if (x < 0.78) return  Math.sin((x - 0.58) / 0.20 * Math.PI) * 0.22;
+    return 0;
+  }
+
+  const cycles = 2.5;
+  const pts = [];
+  for (let i = 0; i < n; i++) {
+    const t = i / (n - 1);
+    const cx = (t * cycles) % 1;
+    pts.push({
+      x: -0.88 + t * 1.76,
+      y: -ecgY(cx) * 0.80 + (Math.random() - 0.5) * 0.012
     });
   }
   return pts;
 }
 
 /* ============================================================
-   NETWORK FREE-FLOATING STATE
+   DOTS
 ============================================================ */
-function updateNetworkMotion() {
-  for (const p of particles) {
-    p.x += p.vx;
-    p.y += p.vy;
+function makeDots(n) {
+  const sph = fibonacciSphere(n);
+  const dna = dnaPoints(n);
+  const mic = microscopePoints(n);
+  const bar = barChartPoints(n);
+  const ai = aiPoints(n);
+  const ecg = ecgPoints(n);
 
-    if (p.x < 0 || p.x > W) p.vx *= -1;
-    if (p.y < 0 || p.y > H) p.vy *= -1;
+  return Array.from({ length: n }, (_, i) => ({
+    x: Math.random() * W,
+    y: Math.random() * H,
+    vx: (Math.random() - 0.5) * 2.5,
+    vy: (Math.random() - 0.5) * 2.5,
+    r: Math.random() * 2.5 + 1.5,
 
-    p.x = clamp(p.x, 0, W);
-    p.y = clamp(p.y, 0, H);
-  }
-}
-
-function getNetworkPoints() {
-  return particles.map(p => ({
-    x: p.x,
-    y: p.y,
-    z: 0,
-    scale: 1,
-    visible: true
+    sx: sph[i].x, sy: sph[i].y, sz: sph[i].z,
+    dx: dna[i].x, dy: dna[i].y,
+    mc_x: mic[i].x, mc_y: mic[i].y,
+    bx: bar[i].x, by: bar[i].y,
+    ax: ai[i].x, ay: ai[i].y,
+    ex: ecg[i].x, ey: ecg[i].y,
   }));
 }
 
 /* ============================================================
-   PHASE TIMING
+   PHASE WEIGHTS
 ============================================================ */
-function getPhaseInfo(cycleTime) {
-  let acc = 0;
-  for (let i = 0; i < PHASES.length; i++) {
-    const d = PHASES[i].duration;
-    if (cycleTime < acc + d) {
-      return {
-        index: i,
-        name: PHASES[i].name,
-        localT: (cycleTime - acc) / d,
-        start: acc,
-        duration: d
-      };
-    }
-    acc += d;
-  }
-  return {
-    index: 0,
-    name: PHASES[0].name,
-    localT: 0,
-    start: 0,
-    duration: PHASES[0].duration
-  };
-}
+function getWeights(c) {
+  let wN = 0, wG = 0, wD = 0, wM = 0, wB = 0, wA = 0, wE = 0;
+  const t3 = start => easeInOut((c - start) / 3);
 
-function getShapePointsByName(name, absoluteTime) {
-  switch (name) {
-    case 'network':
-      return getNetworkPoints();
-    case 'globe':
-      return getGlobePoints(absoluteTime);
-    case 'dna':
-      return getDNAPoints(NUM_PARTICLES, absoluteTime);
-    case 'microscope':
-      return getMicroscopePoints(NUM_PARTICLES);
-    case 'chart':
-      return getChartPoints(NUM_PARTICLES);
-    case 'ai':
-      return getAIPoints(NUM_PARTICLES);
-    case 'heartbeat':
-      return getHeartbeatPoints(NUM_PARTICLES, absoluteTime);
-    default:
-      return getNetworkPoints();
-  }
-}
+  if      (c <  7) { wN = 1; }
+  else if (c < 10) { const t = t3( 7); wN = 1 - t; wG = t; }
+  else if (c < 18) { wG = 1; }
+  else if (c < 21) { const t = t3(18); wG = 1 - t; wD = t; }
+  else if (c < 29) { wD = 1; }
+  else if (c < 32) { const t = t3(29); wD = 1 - t; wM = t; }
+  else if (c < 40) { wM = 1; }
+  else if (c < 43) { const t = t3(40); wM = 1 - t; wB = t; }
+  else if (c < 51) { wB = 1; }
+  else if (c < 54) { const t = t3(51); wB = 1 - t; wA = t; }
+  else if (c < 62) { wA = 1; }
+  else if (c < 65) { const t = t3(62); wA = 1 - t; wE = t; }
+  else if (c < 73) { wE = 1; }
+  else             { const t = t3(73); wE = 1 - t; wN = t; }
 
-function blendPointSets(fromSet, toSet, t) {
-  const out = [];
-  for (let i = 0; i < NUM_PARTICLES; i++) {
-    const a = fromSet[i] || fromSet[fromSet.length - 1];
-    const b = toSet[i] || toSet[toSet.length - 1];
-    out.push({
-      x: lerp(a.x, b.x, t),
-      y: lerp(a.y, b.y, t),
-      z: lerp(a.z || 0, b.z || 0, t),
-      scale: lerp(a.scale || 1, b.scale || 1, t),
-      visible: (a.visible !== false || b.visible !== false)
-    });
-  }
-  return out;
+  return { wN, wG, wD, wM, wB, wA, wE };
 }
 
 /* ============================================================
-   BACKGROUND DRAW HELPERS
+   DRAW HELPERS
 ============================================================ */
-function drawGrid(alpha = 0.10, cell = 60) {
+function drawSatellite(x, y, size, alpha, tilt) {
   ctx.save();
-  ctx.strokeStyle = `rgba(${DOT_COLOR},${alpha})`;
+  ctx.translate(x, y);
+  ctx.rotate(tilt);
+  ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+
+  ctx.fillStyle = 'rgba(14,244,200,0.92)';
+  ctx.fillRect(-size * 0.55, -size * 0.28, size * 1.10, size * 0.56);
+
+  ctx.fillStyle = 'rgba(14,244,200,0.48)';
+  ctx.fillRect(-size * 1.90, -size * 0.20, size * 1.25, size * 0.40);
+  ctx.fillRect( size * 0.65, -size * 0.20, size * 1.25, size * 0.40);
+
+  ctx.strokeStyle = 'rgba(14,244,200,0.22)';
+  ctx.lineWidth = 0.6;
+  for (let k = 1; k < 3; k++) {
+    const dxL = -size * 1.90 + k * (size * 1.25 / 3);
+    const dxR =  size * 0.65 + k * (size * 1.25 / 3);
+    ctx.beginPath(); ctx.moveTo(dxL, -size * 0.20); ctx.lineTo(dxL, size * 0.20); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(dxR, -size * 0.20); ctx.lineTo(dxR, size * 0.20); ctx.stroke();
+  }
+
+  ctx.strokeStyle = 'rgba(14,244,200,0.80)';
   ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(0, -size * 0.28); ctx.lineTo(0, -size * 0.82); ctx.stroke();
 
-  for (let x = 0; x <= W; x += cell) {
-    ctx.beginPath();
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x, H);
-    ctx.stroke();
-  }
-  for (let y = 0; y <= H; y += cell) {
-    ctx.beginPath();
-    ctx.moveTo(0, y);
-    ctx.lineTo(W, y);
-    ctx.stroke();
-  }
-  ctx.restore();
-}
-
-function drawHeartbeatGlow(points, alpha) {
-  ctx.save();
-  ctx.lineWidth = 10;
-  ctx.strokeStyle = `rgba(${DOT_COLOR},${0.07 * alpha})`;
-  ctx.shadowColor = `rgba(${DOT_COLOR},${0.45 * alpha})`;
-  ctx.shadowBlur = 24;
-  ctx.beginPath();
-  ctx.moveTo(points[0].x, points[0].y);
-  for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
+  ctx.beginPath(); ctx.arc(0, -size * 0.82, size * 0.20, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(14,244,200,0.55)';
+  ctx.fill();
   ctx.stroke();
 
-  ctx.lineWidth = 3;
-  ctx.strokeStyle = `rgba(${DOT_COLOR},${0.85 * alpha})`;
   ctx.beginPath();
-  ctx.moveTo(points[0].x, points[0].y);
-  for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
-  ctx.stroke();
+  ctx.arc(0, 0, size * 0.16, 0, Math.PI * 2);
+  ctx.fillStyle = '#0ef4c8';
+  ctx.fill();
+
   ctx.restore();
 }
 
-function drawAIRings(alpha, absoluteTime) {
-  const r = Math.min(W, H) * 0.22;
-  const spin = absoluteTime * 0.35;
+function drawAIOverlay(wA, elapsed) {
+  if (wA < 0.01) return;
+
+  const cx = W / 2, cy = H / 2;
+  const R = Math.min(W, H) * 0.30;
+  const rot = elapsed * 0.22;
 
   ctx.save();
+  ctx.translate(cx, cy);
 
-  for (let i = 0; i < 5; i++) {
-    const rr = r + i * 10;
+  ctx.rotate(rot);
+  ctx.globalAlpha = wA * 0.28;
+  for (let i = 0; i < 16; i++) {
+    const a1 = (i / 16) * Math.PI * 2;
+    const a2 = a1 + (Math.PI * 2 / 16) * 0.68;
     ctx.beginPath();
-    ctx.arc(CX, CY, rr, spin + i * 0.42, spin + i * 0.42 + Math.PI * 1.55);
-    ctx.strokeStyle = `rgba(210,240,255,${(0.12 - i * 0.015) * alpha})`;
-    ctx.lineWidth = 1.2;
+    ctx.arc(0, 0, R, a1, a2);
+    ctx.strokeStyle = '#0ef4c8';
+    ctx.lineWidth = 2.0;
     ctx.stroke();
   }
 
-  // connector dots
-  const ringAngles = [0.25, 0.78, 1.62, 2.38, 3.10, 3.82, 4.65, 5.50];
-  ringAngles.forEach((a, idx) => {
-    const rr = r + (idx % 2 === 0 ? 32 : 18);
-    const x = CX + Math.cos(a + spin * 0.6) * rr;
-    const y = CY + Math.sin(a + spin * 0.6) * rr;
+  ctx.rotate(-rot * 2.2);
+  ctx.globalAlpha = wA * 0.20;
+  for (let i = 0; i < 8; i++) {
+    const a1 = (i / 8) * Math.PI * 2;
+    const a2 = a1 + (Math.PI * 2 / 8) * 0.55;
     ctx.beginPath();
-    ctx.arc(x, y, 3.2, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(210,240,255,${0.7 * alpha})`;
-    ctx.fill();
-  });
+    ctx.arc(0, 0, R * 0.60, a1, a2);
+    ctx.strokeStyle = '#0ef4c8';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  }
+
+  ctx.rotate(rot * 1.2);
+  ctx.globalAlpha = wA * 0.16;
+  ctx.beginPath();
+  ctx.arc(0, 0, R * 0.22, 0, Math.PI * 2);
+  ctx.strokeStyle = '#0ef4c8';
+  ctx.lineWidth = 1.2;
+  ctx.stroke();
 
   ctx.restore();
 }
 
-function drawSatellites(alpha, absoluteTime) {
-  const globeR = Math.min(W, H) * 0.235;
-  const satellites = [
-    { orbit: globeR * 1.22, speed: 0.85, phase: 0.2, size: 20 },
-    { orbit: globeR * 1.34, speed: -0.65, phase: 2.15, size: 17 },
-    { orbit: globeR * 1.46, speed: 0.52, phase: 4.1, size: 15 }
-  ];
+function drawECGOverlay(wE, cycleTime) {
+  if (wE < 0.01) return;
+
+  const cx = W / 2, cy = H / 2;
+  const sX = W * 0.43, sY = H * 0.36;
+
+  const phaseElapsed = Math.max(0, cycleTime - 65);
+  const progress = Math.min(1, (phaseElapsed % 4) / 4);
+
+  function ecgY(x) {
+    if (x < 0.10) return  Math.sin(x / 0.10 * Math.PI) * 0.07;
+    if (x < 0.25) return  0;
+    if (x < 0.30) return -Math.sin((x - 0.25) / 0.05 * Math.PI) * 0.18;
+    if (x < 0.35) return  Math.sin((x - 0.30) / 0.05 * Math.PI) * 1.00;
+    if (x < 0.42) return -Math.sin((x - 0.35) / 0.07 * Math.PI) * 0.14;
+    if (x < 0.58) return  0;
+    if (x < 0.78) return  Math.sin((x - 0.58) / 0.20 * Math.PI) * 0.22;
+    return 0;
+  }
+
+  const cycles = 2.5, steps = 320;
 
   ctx.save();
+  ctx.globalAlpha = wE * 0.88;
+  ctx.shadowColor = '#0ef4c8';
+  ctx.shadowBlur = 15;
+  ctx.strokeStyle = '#0ef4c8';
+  ctx.lineWidth = 2.4;
+  ctx.beginPath();
 
-  satellites.forEach((s, idx) => {
-    const a = absoluteTime * s.speed + s.phase;
-    const x = CX + Math.cos(a) * s.orbit;
-    const y = CY + Math.sin(a) * s.orbit * 0.65;
-
-    // orbit path
-    ctx.beginPath();
-    ctx.ellipse(CX, CY, s.orbit, s.orbit * 0.65, 0, 0, Math.PI * 2);
-    ctx.strokeStyle = `rgba(${DOT_COLOR},${0.05 * alpha})`;
-    ctx.lineWidth = 1;
-    ctx.stroke();
-
-    if (satelliteImg.complete && satelliteImg.naturalWidth > 0) {
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.rotate(a + (idx % 2 === 0 ? 0.3 : -0.6));
-      ctx.globalAlpha = 0.85 * alpha;
-      ctx.shadowColor = `rgba(${DOT_COLOR},${0.35 * alpha})`;
-      ctx.shadowBlur = 10;
-      ctx.drawImage(satelliteImg, -s.size / 2, -s.size / 2, s.size, s.size);
-      ctx.restore();
+  let started = false;
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    if (t > progress) break;
+    const cycX = (t * cycles) % 1;
+    const px = cx + (-0.88 + t * 1.76) * sX;
+    const py = cy + (-ecgY(cycX) * 0.80) * sY;
+    if (!started) {
+      ctx.moveTo(px, py);
+      started = true;
     } else {
-      // fallback vector satellite
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.rotate(a);
-      ctx.globalAlpha = 0.8 * alpha;
-
-      ctx.fillStyle = `rgba(220,245,255,${0.85 * alpha})`;
-      ctx.strokeStyle = `rgba(${DOT_COLOR},${0.65 * alpha})`;
-      ctx.lineWidth = 1;
-
-      // body
-      ctx.fillRect(-4, -4, 8, 8);
-      // left panel
-      ctx.strokeRect(-11, -3, 6, 6);
-      // right panel
-      ctx.strokeRect(5, -3, 6, 6);
-      // antenna
-      ctx.beginPath();
-      ctx.moveTo(0, 4);
-      ctx.lineTo(0, 9);
-      ctx.stroke();
-
-      ctx.restore();
+      ctx.lineTo(px, py);
     }
-  });
+  }
+  ctx.stroke();
 
+  if (progress > 0 && progress < 1) {
+    const t = progress;
+    const cycX = (t * cycles) % 1;
+    const dotX = cx + (-0.88 + t * 1.76) * sX;
+    const dotY = cy + (-ecgY(cycX) * 0.80) * sY;
+    ctx.beginPath();
+    ctx.arc(dotX, dotY, 5, 0, Math.PI * 2);
+    ctx.fillStyle = '#0ef4c8';
+    ctx.shadowBlur = 22;
+    ctx.fill();
+  }
   ctx.restore();
 }
 
-function drawGlobeShell(alpha) {
-  const globeR = Math.min(W, H) * 0.235;
+function drawFilledBarsOverlay(wB) {
+  if (wB < 0.01) return;
+
+  const scale = Math.min(W, H) * 0.38 * 0.72;
+  const cols = 6;
+  const bH = [0.22, 0.38, 0.52, 0.64, 0.76, 0.90];
+  const bX = [-0.68, -0.42, -0.16, 0.10, 0.36, 0.62];
+  const baseY = 0.62;
+  const barW = 0.12;
 
   ctx.save();
-  ctx.shadowColor = `rgba(${DOT_COLOR},${0.12 * alpha})`;
-  ctx.shadowBlur = 30;
+  ctx.globalAlpha = 0.30 * wB;
 
-  for (let i = 0; i < 5; i++) {
-    ctx.beginPath();
-    ctx.arc(CX, CY, globeR + i * 9, 0, Math.PI * 2);
-    ctx.strokeStyle = `rgba(210,240,255,${(0.18 - i * 0.025) * alpha})`;
-    ctx.lineWidth = 1.2;
-    ctx.stroke();
+  for (let i = 0; i < cols; i++) {
+    const x = CX + (bX[i] - barW / 2) * scale;
+    const y = CY + (baseY - bH[i] * 1.35) * scale;
+    const width = barW * scale;
+    const height = (bH[i] * 1.35) * scale;
+
+    ctx.fillStyle = 'rgba(14,244,200,0.18)';
+    ctx.strokeStyle = 'rgba(14,244,200,0.28)';
+    ctx.lineWidth = 1;
+    ctx.fillRect(x, y, width, height);
+    ctx.strokeRect(x, y, width, height);
   }
 
   ctx.restore();
 }
 
 /* ============================================================
-   MAIN DRAW
+   MAIN LOOP
 ============================================================ */
-function drawConnections(displayPoints, alphaBoost = 1) {
-  const maxDist = 120;
-  for (let i = 0; i < displayPoints.length; i++) {
-    const a = displayPoints[i];
-    if (a.visible === false) continue;
-    for (let j = i + 1; j < displayPoints.length; j++) {
-      const b = displayPoints[j];
-      if (b.visible === false) continue;
-      const dx = a.x - b.x;
-      const dy = a.y - b.y;
-      const dd = Math.sqrt(dx * dx + dy * dy);
-      if (dd < maxDist) {
-        const alpha = (1 - dd / maxDist) * 0.28 * alphaBoost;
-        ctx.beginPath();
-        ctx.moveTo(a.x, a.y);
-        ctx.lineTo(b.x, b.y);
-        ctx.strokeStyle = `rgba(${DOT_COLOR},${alpha})`;
-        ctx.lineWidth = 1;
-        ctx.stroke();
-      }
-    }
-  }
-}
+function draw() {
+  const elapsed = (performance.now() - startTime) / 1000;
+  const cycleTime = elapsed % CYCLE;
+  const cx = W / 2, cy = H / 2;
 
-function drawParticles(displayPoints, pulseTime, alpha = 1) {
-  for (let i = 0; i < displayPoints.length; i++) {
-    const p = displayPoints[i];
-    if (p.visible === false) continue;
+  const globeR = Math.min(W, H) * 0.32;
+  const scale = Math.min(W, H) * 0.38;
 
-    const pulse = 0.88 + Math.sin(pulseTime * 1.7 + i * 0.15) * 0.12;
-    const r = particles[i].r * (p.scale || 1) * pulse;
+  // use speeds from your script
+  const rotY = elapsed * 0.40;
+  const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
 
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(${DOT_COLOR},${0.72 * alpha})`;
-    ctx.fill();
-  }
-}
-
-function animate() {
-  const now = performance.now();
-  const elapsed = (now - startTime) / 1000;
-  const cycleTime = elapsed % TOTAL_DURATION;
-  const phase = getPhaseInfo(cycleTime);
-  const nextPhaseIndex = (phase.index + 1) % PHASES.length;
-  const nextPhaseName = PHASES[nextPhaseIndex].name;
-
-  updateNetworkMotion();
+  const { wN, wG, wD, wM, wB, wA, wE } = getWeights(cycleTime);
 
   ctx.clearRect(0, 0, W, H);
 
-  // phase transition window near the end of each phase
-  const transitionStart = 0.72;
-  const rawBlend = clamp((phase.localT - transitionStart) / (1 - transitionStart), 0, 1);
-  const blend = easeInOut(rawBlend);
-
-  const currentSet = getShapePointsByName(phase.name, elapsed);
-  const nextSet = getShapePointsByName(nextPhaseName, elapsed);
-  const displayPoints = blendPointSets(currentSet, nextSet, blend);
-
-  // background accents by phase
-  if (phase.name === 'heartbeat' || (phase.name === 'ai' && blend > 0.45 && nextPhaseName === 'heartbeat')) {
-    drawGrid(0.10, 60);
+  for (const d of dots) {
+    d.x += d.vx;
+    d.y += d.vy;
+    if (d.x < 0 || d.x > W) d.vx *= -1;
+    if (d.y < 0 || d.y > H) d.vy *= -1;
   }
 
-  if (phase.name === 'globe' || (phase.name === 'network' && blend > 0.45 && nextPhaseName === 'globe')) {
-    const globeAlpha = phase.name === 'globe' ? 1 : blend;
-    drawGlobeShell(globeAlpha);
-    drawSatellites(globeAlpha, elapsed);
+  const display = dots.map(d => {
+    const rx = d.sx * cosY + d.sz * sinY;
+    const rz = -d.sx * sinY + d.sz * cosY;
+    const gx = cx + rx * globeR;
+    const gy = cy + d.sy * globeR;
+
+    const x = d.x * wN
+            + gx * wG
+            + (cx + d.dx   * scale * 0.82) * wD
+            + (cx + d.mc_x * scale * 0.72) * wM
+            + (cx + d.bx   * scale * 0.72) * wB
+            + (cx + d.ax   * scale * 0.78) * wA
+            + (cx + d.ex   * scale * 0.78) * wE;
+
+    const y = d.y * wN
+            + gy * wG
+            + (cy + d.dy   * scale * 0.82) * wD
+            + (cy + d.mc_y * scale * 0.72) * wM
+            + (cy + d.by   * scale * 0.72) * wB
+            + (cy + d.ay   * scale * 0.78) * wA
+            + (cy + d.ey   * scale * 0.78) * wE;
+
+    return { x, y, r: d.r, depth: rz };
+  });
+
+  // clearer bar fill behind dots
+  drawFilledBarsOverlay(wB);
+
+  const connW = wN + wG * 0.42 + wD * 0.48;
+  if (connW > 0.05) {
+    const maxDist = 130 + wN * 50;
+    for (let i = 0; i < display.length; i++) {
+      for (let j = i + 1; j < display.length; j++) {
+        const a = display[i], b = display[j];
+        const ddx = a.x - b.x, ddy = a.y - b.y;
+        const distance = Math.sqrt(ddx * ddx + ddy * ddy);
+        if (distance < maxDist) {
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.strokeStyle = `rgba(14,244,200,${0.42 * (1 - distance / maxDist) * connW})`;
+          ctx.lineWidth = 1.2;
+          ctx.stroke();
+        }
+      }
+    }
   }
 
-  if (phase.name === 'ai' || (phase.name === 'chart' && blend > 0.45 && nextPhaseName === 'ai')) {
-    const aiAlpha = phase.name === 'ai' ? 1 : blend;
-    drawAIRings(aiAlpha, elapsed);
+  for (const p of display) {
+    const depthScale = wG > 0.15 ? (0.50 + 0.50 * ((p.depth + 1) / 2)) : 1;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r * depthScale, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(14,244,200,${0.74 * depthScale})`;
+    ctx.fill();
   }
 
-  if (phase.name === 'heartbeat' || (phase.name === 'ai' && blend > 0.45 && nextPhaseName === 'heartbeat')) {
-    const hbAlpha = phase.name === 'heartbeat' ? 1 : blend;
-    const hbPts = getHeartbeatPoints(120, elapsed);
-    drawHeartbeatGlow(hbPts, hbAlpha);
+  // globe satellites using your speeds/config style
+  if (wG > 0.04) {
+    const satCfg = [
+      { speed: 0.40, phase: 0,             size: 5.5 },
+      { speed: 0.62, phase: Math.PI*0.67,  size: 4.5 },
+      { speed: 0.28, phase: Math.PI*1.34,  size: 4.0 },
+    ];
+    for (const s of satCfg) {
+      const angle = elapsed * s.speed + s.phase;
+      const orbitR = globeR * 1.32;
+      const sx = cx + Math.cos(angle) * orbitR;
+      const sy = cy + Math.sin(angle) * orbitR * 0.42;
+      drawSatellite(sx, sy, s.size, wG * 0.80, angle + Math.PI * 0.5);
+    }
   }
 
-  // connection logic
-  if (phase.name === 'network') {
-    drawConnections(displayPoints, 1.0 - blend * 0.25);
-  } else if (phase.name === 'globe') {
-    drawConnections(displayPoints, 0.30);
-  } else if (phase.name === 'dna') {
-    drawConnections(displayPoints, 0.22);
-  } else if (phase.name === 'microscope') {
-    drawConnections(displayPoints, 0.10);
-  } else if (phase.name === 'chart') {
-    drawConnections(displayPoints, 0.10);
-  } else if (phase.name === 'ai') {
-    drawConnections(displayPoints, 0.16);
-  } else if (phase.name === 'heartbeat') {
-    drawConnections(displayPoints, 0.06);
-  }
+  drawAIOverlay(wA, elapsed);
+  drawECGOverlay(wE, cycleTime);
 
-  drawParticles(displayPoints, elapsed, 1);
-
-  requestAnimationFrame(animate);
+  requestAnimationFrame(draw);
 }
 
 /* ============================================================
-   INIT / RESIZE
+   INIT
 ============================================================ */
-function fullReset() {
-  resizeCanvas();
-  initParticles();
-}
-
-window.addEventListener('resize', fullReset);
-
+resize();
+dots = makeDots(NUM_DOTS);
 startTime = performance.now();
-animate();
+draw();
+
+window.addEventListener('resize', () => {
+  resize();
+  dots = makeDots(NUM_DOTS);
+});
 </script>
   
 </body>
