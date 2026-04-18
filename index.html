@@ -1406,282 +1406,550 @@ footer span { color: var(--teal); }
 </footer>
 
 <script>
-function togglePub(el) {
-  const isOpen = el.classList.contains('open');
-  document.querySelectorAll('.pub-item').forEach(p => p.classList.remove('open'));
-  if (!isOpen) el.classList.add('open');
-}
+// ================================================================
+//  HERO CANVAS ANIMATION — 7-Phase Scientific Loop
+//
+//  Phase 1 — Neural Network        (0–7s hold)
+//  Phase 2 — Globe + Satellites    (7–10 transition │ 10–18s hold)
+//  Phase 3 — DNA Helix             (18–21 transition │ 21–29s hold)
+//  Phase 4 — Microscope            (29–32 transition │ 32–40s hold)
+//  Phase 5 — Bar Chart / Trend     (40–43 transition │ 43–51s hold)
+//  Phase 6 — AI Circular Symbol    (51–54 transition │ 54–62s hold)
+//  Phase 7 — ECG Heartbeat         (62–65 transition │ 65–73s hold)
+//  ── loop back to Neural Network  (73–76 transition) ──
+//  Total cycle: 76 seconds
+// ================================================================
 
-const observer = new IntersectionObserver(entries => {
-  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-}, { threshold: 0.08 });
-document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+const canvas    = document.getElementById('neural');
+const ctx       = canvas.getContext('2d');
+let   W, H, dots, startTime;
+const NUM_DOTS  = 100;
+const CYCLE     = 76;
 
-/* ============================================================
-   NEURAL NETWORK → GLOBE → SAILING SHIP animation
-   Phase 1 (0-7s):    free-floating neural network
-   Phase 2 (7-10s):   morph into globe
-   Phase 3 (10-18s):  rotating dotted globe
-   Phase 4 (18-21s):  morph into sailing ship
-   Phase 5 (21-29s):  ship with flying birds
-   Phase 6 (29-32s):  scatter back to neural network
-   ...loops (32s total)
-============================================================ */
-const canvas = document.getElementById('neural');
-const ctx = canvas.getContext('2d');
-let W, H, dots, birds, startTime;
-const NUM_DOTS = 100;
-
+// ── Resize ───────────────────────────────────────────────────────
 function resize() {
-  W = canvas.width = canvas.offsetWidth;
+  W = canvas.width  = canvas.offsetWidth;
   H = canvas.height = canvas.offsetHeight;
 }
 
-/* --- Fibonacci sphere for globe phase --- */
-function fibonacciSphere(n) {
-  const points = [];
-  const phi = Math.PI * (3 - Math.sqrt(5));
-  for (let i = 0; i < n; i++) {
-    const y = 1 - (i / (n - 1)) * 2;
-    const radius = Math.sqrt(1 - y * y);
-    const theta = phi * i;
-    points.push({ x: Math.cos(theta) * radius, y: y, z: Math.sin(theta) * radius });
-  }
-  return points;
+// ── Easing ───────────────────────────────────────────────────────
+function easeInOut(t) {
+  return t < 0.5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2)/2;
 }
 
-/* --- Sailboat silhouette points (normalized -1..1 coords, y inverted) ---
-   Boat hull + two triangular sails + mast + small figure  */
-function sailboatPoints(n) {
-  const pts = [];
+// ================================================================
+//  SHAPE POINT GENERATORS  ← all coords in –1 … +1 space
+// ================================================================
 
-  /* HULL — curved bottom (ellipse arc) */
-  const hullCount = Math.floor(n * 0.22);
-  for (let i = 0; i < hullCount; i++) {
-    const t = i / (hullCount - 1);
-    const angle = Math.PI + t * Math.PI;       // bottom half-ellipse
+/* ── Phase 2: Globe (Fibonacci sphere) ──────────────────────── */
+function fibonacciSphere(n) {
+  const pts = [], phi = Math.PI*(3 - Math.sqrt(5));
+  for (let i = 0; i < n; i++) {
+    const y = 1 - (i/(n-1))*2;
+    const r = Math.sqrt(1 - y*y);
+    const t = phi*i;
+    pts.push({ x: Math.cos(t)*r, y, z: Math.sin(t)*r });
+  }
+  return pts;
+}
+
+/* ── Phase 3: DNA Double Helix ──────────────────────────────── */
+function dnaPoints(n) {
+  const pts = [];
+  const turns = 3.5, helixR = 0.36;
+  const nStrand = Math.floor(n*0.38);
+  const nRungDots = n - nStrand*2;
+  const nRungs  = Math.floor(nRungDots / 3);
+
+  // Strand A
+  for (let i = 0; i < nStrand; i++) {
+    const t = (i/(nStrand-1)) * turns * Math.PI*2;
+    pts.push({ x: Math.sin(t)*helixR, y: (i/(nStrand-1))*1.80 - 0.90 });
+  }
+  // Strand B (offset by π)
+  for (let i = 0; i < nStrand; i++) {
+    const t = (i/(nStrand-1)) * turns * Math.PI*2 + Math.PI;
+    pts.push({ x: Math.sin(t)*helixR, y: (i/(nStrand-1))*1.80 - 0.90 });
+  }
+  // Rungs: 3 dots each (left end, midpoint, right end)
+  for (let r = 0; r < nRungs; r++) {
+    const frac = (r + 0.5) / nRungs;
+    const t    = frac * turns * Math.PI*2;
+    const xA   =  Math.sin(t) * helixR;
+    const xB   = -Math.sin(t) * helixR;
+    const y    = frac*1.80 - 0.90;
+    pts.push({ x: xA,          y });
+    pts.push({ x: (xA+xB)/2,  y });
+    pts.push({ x: xB,          y });
+  }
+  // Fill any remainder along a sine wave spine
+  const rem = n - pts.length;
+  for (let i = 0; i < rem; i++) {
+    const frac = i / Math.max(1, rem-1);
+    const t = frac * turns * Math.PI*2;
+    pts.push({ x: Math.sin(t+Math.PI/2)*helixR*0.55, y: frac*1.80 - 0.90 });
+  }
+  return pts;
+}
+
+/* ── Phase 4: Microscope silhouette ─────────────────────────── */
+function microscopePoints(n) {
+  // Defined as connected polyline segments [x1,y1, x2,y2]
+  const segs = [
+    // Eyepiece tube
+    [-0.08,-0.88,  0.08,-0.88],
+    [-0.10,-0.88, -0.10,-0.72],
+    [ 0.10,-0.88,  0.10,-0.72],
+    // Body tube (angled)
+    [-0.10,-0.72, -0.22,-0.12],
+    [ 0.10,-0.72,  0.04,-0.12],
+    [-0.22,-0.12,  0.04,-0.12],
+    // Revolving nosepiece
+    [ 0.04,-0.12,  0.16,-0.12],
+    // Objective lens
+    [ 0.10,-0.12,  0.10, 0.08],
+    [ 0.10, 0.08,  0.18, 0.08],
+    [ 0.18, 0.08,  0.18, 0.24],
+    [ 0.18, 0.24,  0.10, 0.24],
+    // Stage (horizontal platform)
+    [-0.50, 0.24,  0.50, 0.24],
+    [-0.50, 0.33,  0.50, 0.33],
+    // Arm (vertical column)
+    [-0.28, 0.24, -0.28, 0.60],
+    // Coarse focus knob (two rings)
+    [-0.42, 0.34, -0.42, 0.52],
+    [-0.50, 0.34, -0.50, 0.52],
+    [-0.42, 0.34, -0.50, 0.34],
+    [-0.42, 0.52, -0.50, 0.52],
+    // Sub-stage condenser
+    [-0.08, 0.33, -0.08, 0.55],
+    [ 0.08, 0.33,  0.08, 0.55],
+    [-0.08, 0.55,  0.08, 0.55],
+    // Base
+    [-0.58, 0.60,  0.58, 0.60],
+    [-0.58, 0.60, -0.58, 0.78],
+    [ 0.58, 0.60,  0.58, 0.78],
+    [-0.58, 0.78,  0.58, 0.78],
+  ];
+  const lengths = segs.map(s => Math.hypot(s[2]-s[0], s[3]-s[1]));
+  const total   = lengths.reduce((a,b)=>a+b, 0);
+  const pts     = [];
+  for (let i = 0; i < n; i++) {
+    let rem = (i/n)*total, cum = 0;
+    for (let s = 0; s < segs.length; s++) {
+      cum += lengths[s];
+      if (rem <= cum || s === segs.length-1) {
+        const [x1,y1,x2,y2] = segs[s];
+        const tf = lengths[s] > 0 ? Math.min(1,(rem-(cum-lengths[s]))/lengths[s]) : 0.5;
+        pts.push({ x: x1+tf*(x2-x1), y: y1+tf*(y2-y1) });
+        break;
+      }
+    }
+  }
+  return pts;
+}
+
+/* ── Phase 5: Bar Chart + Trend Line ────────────────────────── */
+function barChartPoints(n) {
+  const pts   = [];
+  const cols  = 6;
+  const bH    = [0.22, 0.38, 0.52, 0.64, 0.76, 0.90];
+  const bX    = [-0.68,-0.42,-0.16, 0.10, 0.36, 0.62];
+  const baseY =  0.62, barW = 0.10;
+  const perBar = Math.floor(n*0.66/cols);
+
+  // Bar columns
+  for (let b = 0; b < cols; b++) {
+    const topY = baseY - bH[b]*1.35;
+    for (let i = 0; i < perBar; i++) {
+      const t = i/perBar;
+      pts.push({
+        x: bX[b] + (Math.random()-0.5)*barW,
+        y: baseY  - t*(baseY - topY)
+      });
+    }
+  }
+  // X-axis dots
+  const axN = Math.floor(n*0.06);
+  for (let i = 0; i < axN; i++) {
+    pts.push({ x: -0.76+(i/axN)*1.52, y: baseY+0.05 });
+  }
+  // Rising trend line
+  const trendN = n - pts.length;
+  for (let i = 0; i < trendN; i++) {
+    const t   = i/Math.max(1,trendN-1);
+    const idx = t*(cols-1);
+    const bi  = Math.min(Math.floor(idx), cols-2);
+    const bf  = idx - bi;
+    const h   = bH[bi]*(1-bf) + bH[bi+1]*bf;
     pts.push({
-      x: Math.cos(angle) * 0.85,
-      y: 0.45 + Math.sin(angle) * 0.18 * -1     // flip so curve sits below
+      x: bX[0] + t*(bX[cols-1]-bX[0]),
+      y: baseY  - h*1.35 - 0.07 + (Math.random()-0.5)*0.025
     });
   }
-  /* HULL — top deck line */
-  const deckCount = Math.floor(n * 0.08);
-  for (let i = 0; i < deckCount; i++) {
-    const t = i / (deckCount - 1);
-    pts.push({ x: -0.85 + t * 1.7, y: 0.27 });
-  }
-
-  /* MAST — vertical line */
-  const mastCount = Math.floor(n * 0.10);
-  for (let i = 0; i < mastCount; i++) {
-    const t = i / (mastCount - 1);
-    pts.push({ x: -0.05, y: 0.27 - t * 1.15 });   // from deck up to top
-  }
-
-  /* MAIN SAIL — large right triangle (right of mast) */
-  const mainCount = Math.floor(n * 0.30);
-  /* fill triangle: top apex (-0.05, -0.88), bottom-right (0.55, 0.25), bottom-left (-0.05, 0.25) */
-  for (let i = 0; i < mainCount; i++) {
-    /* random barycentric-like fill, but deterministic via index */
-    const u = (i * 0.6180339887) % 1;             // golden ratio for even spread
-    const v = (i * 0.3819660113) % 1;
-    let a = u, b = v;
-    if (a + b > 1) { a = 1 - a; b = 1 - b; }
-    const x = -0.05 + a * 0.60 + b * 0.00;
-    const y = 0.25 + a * (-1.13) + b * 0.00;
-    pts.push({ x, y });
-  }
-
-  /* JIB SAIL — smaller left triangle */
-  const jibCount = Math.floor(n * 0.18);
-  for (let i = 0; i < jibCount; i++) {
-    const u = (i * 0.6180339887 + 0.13) % 1;
-    const v = (i * 0.3819660113 + 0.27) % 1;
-    let a = u, b = v;
-    if (a + b > 1) { a = 1 - a; b = 1 - b; }
-    /* apex top (-0.05, -0.65), bottom-left (-0.70, 0.25), bottom-right (-0.05, 0.25) */
-    const x = -0.05 + a * (-0.65) + b * 0.00;
-    const y = 0.25 + a * (-0.90) + b * 0.00;
-    pts.push({ x, y });
-  }
-
-  /* Tiny figure on deck */
-  const figCount = n - pts.length;
-  for (let i = 0; i < figCount; i++) {
-    const t = i / Math.max(1, figCount - 1);
-    pts.push({ x: -0.55 + (Math.random() - 0.5) * 0.04, y: 0.18 - t * 0.12 });
-  }
-
-  return pts.slice(0, n);
+  return pts;
 }
 
+/* ── Phase 6: AI Circular Tech Motif ───────────────────────── */
+function aiPoints(n) {
+  const pts = [];
+  // Concentric rings
+  const rings  = [{ r:0.84, n:Math.floor(n*0.22) },
+                  { r:0.58, n:Math.floor(n*0.15) },
+                  { r:0.22, n:Math.floor(n*0.08) }];
+  for (const ring of rings) {
+    for (let i = 0; i < ring.n; i++) {
+      const a = (i/ring.n)*Math.PI*2;
+      pts.push({ x: Math.cos(a)*ring.r, y: Math.sin(a)*ring.r });
+    }
+  }
+  // 8 radial spokes
+  const spokes = 8, dotsPerSpoke = Math.floor(n*0.28/spokes);
+  for (let s = 0; s < spokes; s++) {
+    const angle = (s/spokes)*Math.PI*2;
+    for (let i = 0; i < dotsPerSpoke; i++) {
+      const t = 0.24 + (i/dotsPerSpoke)*0.58;
+      pts.push({ x: Math.cos(angle)*t, y: Math.sin(angle)*t });
+    }
+  }
+  // Mid-orbit node dots (between spokes)
+  const nodeN = n - pts.length;
+  for (let i = 0; i < nodeN; i++) {
+    const a = (i/nodeN)*Math.PI*2 + Math.PI/spokes;
+    const r = 0.70 + (Math.sin(i*1.618)*0.5+0.5)*0.06;
+    pts.push({ x: Math.cos(a)*r, y: Math.sin(a)*r });
+  }
+  return pts;
+}
+
+/* ── Phase 7: ECG / Heartbeat waveform ─────────────────────── */
+function ecgPoints(n) {
+  // One PQRST cycle mapped across [0,1]
+  function ecgY(x) {
+    if (x < 0.10) return  Math.sin(x/0.10*Math.PI)*0.07;            // P wave
+    if (x < 0.25) return  0;                                         // PR flat
+    if (x < 0.30) return -Math.sin((x-0.25)/0.05*Math.PI)*0.18;    // Q dip
+    if (x < 0.35) return  Math.sin((x-0.30)/0.05*Math.PI)*1.00;    // R spike
+    if (x < 0.42) return -Math.sin((x-0.35)/0.07*Math.PI)*0.14;    // S dip
+    if (x < 0.58) return  0;                                         // ST flat
+    if (x < 0.78) return  Math.sin((x-0.58)/0.20*Math.PI)*0.22;    // T wave
+    return 0;                                                         // TP flat
+  }
+  const cycles = 2.5, pts = [];
+  for (let i = 0; i < n; i++) {
+    const t  = i/(n-1);
+    const cx = (t*cycles) % 1;
+    pts.push({
+      x: -0.88 + t*1.76,
+      y: -ecgY(cx)*0.80 + (Math.random()-0.5)*0.012
+    });
+  }
+  return pts;
+}
+
+// ================================================================
+//  INITIALISE DOTS  (pre-compute all shape targets)
+// ================================================================
 function makeDots(n) {
-  const sphere = fibonacciSphere(n);
-  const boat = sailboatPoints(n);
+  const sph = fibonacciSphere(n);
+  const dna = dnaPoints(n);
+  const mic = microscopePoints(n);
+  const bar = barChartPoints(n);
+  const ai  = aiPoints(n);
+  const ecg = ecgPoints(n);
+
   return Array.from({ length: n }, (_, i) => ({
-    x: Math.random() * W,
-    y: Math.random() * H,
-    vx: (Math.random() - 0.5) * 2.5,
-    vy: (Math.random() - 0.5) * 2.5,
-    r: Math.random() * 2.5 + 1.5,
-    sx: sphere[i].x, sy: sphere[i].y, sz: sphere[i].z,
-    bx: boat[i].x,   by: boat[i].y
+    // Free-floating state
+    x: Math.random()*W, y: Math.random()*H,
+    vx:(Math.random()-0.5)*2.5, vy:(Math.random()-0.5)*2.5,
+    r: Math.random()*2.5 + 1.5,
+    // Globe
+    sx: sph[i].x, sy: sph[i].y, sz: sph[i].z,
+    // DNA
+    dx: dna[i].x, dy: dna[i].y,
+    // Microscope
+    mc_x: mic[i].x, mc_y: mic[i].y,
+    // Bar chart
+    bx: bar[i].x,  by: bar[i].y,
+    // AI symbol
+    ax: ai[i].x,   ay: ai[i].y,
+    // ECG
+    ex: ecg[i].x,  ey: ecg[i].y,
   }));
 }
 
-function makeBirds(n) {
-  return Array.from({ length: n }, () => ({
-    x: -50 - Math.random() * W * 0.5,
-    y: H * (0.15 + Math.random() * 0.25),
-    speed: 0.6 + Math.random() * 0.7,
-    size: 8 + Math.random() * 6,
-    flap: Math.random() * Math.PI * 2,
-    flapSpeed: 0.08 + Math.random() * 0.06
-  }));
+// ================================================================
+//  PHASE WEIGHTS  — returns smooth blend weights for every frame
+// ================================================================
+function getWeights(c) {
+  let wN=0, wG=0, wD=0, wM=0, wB=0, wA=0, wE=0;
+  const t3 = start => easeInOut((c - start) / 3);
+
+  if      (c <  7) { wN = 1; }
+  else if (c < 10) { const t=t3( 7); wN=1-t; wG=t; }
+  else if (c < 18) { wG = 1; }
+  else if (c < 21) { const t=t3(18); wG=1-t; wD=t; }
+  else if (c < 29) { wD = 1; }
+  else if (c < 32) { const t=t3(29); wD=1-t; wM=t; }
+  else if (c < 40) { wM = 1; }
+  else if (c < 43) { const t=t3(40); wM=1-t; wB=t; }
+  else if (c < 51) { wB = 1; }
+  else if (c < 54) { const t=t3(51); wB=1-t; wA=t; }
+  else if (c < 62) { wA = 1; }
+  else if (c < 65) { const t=t3(62); wA=1-t; wE=t; }
+  else if (c < 73) { wE = 1; }
+  else             { const t=t3(73); wE=1-t; wN=t; }
+
+  return { wN, wG, wD, wM, wB, wA, wE };
 }
 
-function easeInOut(t) {
-  return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+// ================================================================
+//  DRAW HELPERS
+// ================================================================
+
+/* ── Tiny vector satellite ─────────────────────────────────── */
+function drawSatellite(x, y, size, alpha, tilt) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(tilt);
+  ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+
+  // Main body
+  ctx.fillStyle = 'rgba(14,244,200,0.92)';
+  ctx.fillRect(-size*0.55, -size*0.28, size*1.10, size*0.56);
+
+  // Solar panel left
+  ctx.fillStyle = 'rgba(14,244,200,0.48)';
+  ctx.fillRect(-size*1.90, -size*0.20, size*1.25, size*0.40);
+  // Solar panel right
+  ctx.fillRect( size*0.65, -size*0.20, size*1.25, size*0.40);
+
+  // Panel grid lines
+  ctx.strokeStyle = 'rgba(14,244,200,0.22)';
+  ctx.lineWidth = 0.6;
+  for (let k = 1; k < 3; k++) {
+    const dxL = -size*1.90 + k*(size*1.25/3);
+    const dxR =  size*0.65 + k*(size*1.25/3);
+    ctx.beginPath(); ctx.moveTo(dxL,-size*0.20); ctx.lineTo(dxL,size*0.20); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(dxR,-size*0.20); ctx.lineTo(dxR,size*0.20); ctx.stroke();
+  }
+
+  // Antenna mast
+  ctx.strokeStyle = 'rgba(14,244,200,0.80)';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(0,-size*0.28); ctx.lineTo(0,-size*0.82); ctx.stroke();
+
+  // Antenna dish
+  ctx.beginPath(); ctx.arc(0,-size*0.82, size*0.20, 0, Math.PI*2);
+  ctx.fillStyle = 'rgba(14,244,200,0.55)'; ctx.fill(); ctx.stroke();
+
+  // Body centre LED dot
+  ctx.beginPath(); ctx.arc(0,0, size*0.16, 0, Math.PI*2);
+  ctx.fillStyle = '#0ef4c8'; ctx.fill();
+
+  ctx.restore();
 }
 
-/* Draw a simple bird shape (two arcs forming a flying "M") */
-function drawBird(b) {
-  const flap = Math.sin(b.flap) * 0.4;
+/* ── AI symbol overlay: animated concentric arc rings ──────── */
+function drawAIOverlay(wA, elapsed) {
+  if (wA < 0.01) return;
+  const cx = W/2, cy = H/2;
+  const R  = Math.min(W,H)*0.30;
+  const rot = elapsed*0.22;
+
+  ctx.save();
+  ctx.translate(cx, cy);
+
+  // Outer segmented ring (slow CW rotation)
+  ctx.rotate(rot);
+  ctx.globalAlpha = wA*0.28;
+  for (let i = 0; i < 16; i++) {
+    const a1 = (i/16)*Math.PI*2, a2 = a1 + (Math.PI*2/16)*0.68;
+    ctx.beginPath(); ctx.arc(0,0,R,a1,a2);
+    ctx.strokeStyle = '#0ef4c8'; ctx.lineWidth = 2.0; ctx.stroke();
+  }
+
+  // Mid ring (counter-rotating)
+  ctx.rotate(-rot*2.2);
+  ctx.globalAlpha = wA*0.20;
+  for (let i = 0; i < 8; i++) {
+    const a1 = (i/8)*Math.PI*2, a2 = a1 + (Math.PI*2/8)*0.55;
+    ctx.beginPath(); ctx.arc(0,0,R*0.60,a1,a2);
+    ctx.strokeStyle = '#0ef4c8'; ctx.lineWidth = 1.5; ctx.stroke();
+  }
+
+  // Inner circle (stationary)
+  ctx.rotate(rot*1.2);
+  ctx.globalAlpha = wA*0.16;
+  ctx.beginPath(); ctx.arc(0,0,R*0.22,0,Math.PI*2);
+  ctx.strokeStyle = '#0ef4c8'; ctx.lineWidth = 1.2; ctx.stroke();
+
+  ctx.restore();
+}
+
+/* ── ECG overlay: animated glowing scan trace ───────────────── */
+function drawECGOverlay(wE, cycleTime) {
+  if (wE < 0.01) return;
+  const cx = W/2, cy = H/2;
+  const sX = W*0.43, sY = H*0.36;
+
+  // Scan resets every 4 seconds within the ECG phase
+  const phaseElapsed = Math.max(0, cycleTime - 65);
+  const progress     = Math.min(1, (phaseElapsed % 4) / 4);
+
+  function ecgY(x) {
+    if (x < 0.10) return  Math.sin(x/0.10*Math.PI)*0.07;
+    if (x < 0.25) return  0;
+    if (x < 0.30) return -Math.sin((x-0.25)/0.05*Math.PI)*0.18;
+    if (x < 0.35) return  Math.sin((x-0.30)/0.05*Math.PI)*1.00;
+    if (x < 0.42) return -Math.sin((x-0.35)/0.07*Math.PI)*0.14;
+    if (x < 0.58) return  0;
+    if (x < 0.78) return  Math.sin((x-0.58)/0.20*Math.PI)*0.22;
+    return 0;
+  }
+
+  const cycles = 2.5, steps = 320;
+  ctx.save();
+  ctx.globalAlpha  = wE*0.88;
+  ctx.shadowColor  = '#0ef4c8';
+  ctx.shadowBlur   = 15;
+  ctx.strokeStyle  = '#0ef4c8';
+  ctx.lineWidth    = 2.4;
   ctx.beginPath();
-  ctx.moveTo(b.x - b.size, b.y + flap * b.size);
-  ctx.quadraticCurveTo(b.x - b.size * 0.5, b.y - b.size * 0.5, b.x, b.y);
-  ctx.quadraticCurveTo(b.x + b.size * 0.5, b.y - b.size * 0.5, b.x + b.size, b.y + flap * b.size);
-  ctx.strokeStyle = 'rgba(14,244,200,0.55)';
-  ctx.lineWidth = 1.6;
+  let started = false;
+  for (let i = 0; i <= steps; i++) {
+    const t = i/steps;
+    if (t > progress) break;
+    const cycX = (t*cycles) % 1;
+    const px = cx + (-0.88 + t*1.76)*sX;
+    const py = cy + (-ecgY(cycX)*0.80)*sY;
+    if (!started) { ctx.moveTo(px,py); started = true; }
+    else           ctx.lineTo(px,py);
+  }
   ctx.stroke();
+
+  // Glowing cursor dot at scan tip
+  if (progress > 0 && progress < 1) {
+    const t    = progress;
+    const cycX = (t*cycles) % 1;
+    const dotX = cx + (-0.88 + t*1.76)*sX;
+    const dotY = cy + (-ecgY(cycX)*0.80)*sY;
+    ctx.beginPath(); ctx.arc(dotX, dotY, 5, 0, Math.PI*2);
+    ctx.fillStyle = '#0ef4c8'; ctx.shadowBlur = 22; ctx.fill();
+  }
+  ctx.restore();
 }
 
+// ================================================================
+//  MAIN ANIMATION LOOP
+// ================================================================
 function draw() {
-  const elapsed = (performance.now() - startTime) / 1000;
-  const cycle = elapsed % 32;
-  const cx = W / 2, cy = H / 2;
-  const globeR = Math.min(W, H) * 0.32;
-  const boatScale = Math.min(W, H) * 0.34;
-  const rotY = elapsed * 0.4;
-  const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
+  const elapsed   = (performance.now() - startTime) / 1000;
+  const cycleTime = elapsed % CYCLE;
+  const cx = W/2, cy = H/2;
+  const globeR = Math.min(W,H)*0.32;
+  const scale  = Math.min(W,H)*0.38;
+  const rotY   = elapsed*0.40;
+  const cosY   = Math.cos(rotY), sinY = Math.sin(rotY);
 
-  /* Determine current mode + blend factors
-     modeA = network, modeB = globe, modeC = boat */
-  let wA = 0, wB = 0, wC = 0;
-  if (cycle < 7)        { wA = 1; }
-  else if (cycle < 10)  { const t = easeInOut((cycle - 7) / 3); wA = 1 - t; wB = t; }
-  else if (cycle < 18)  { wB = 1; }
-  else if (cycle < 21)  { const t = easeInOut((cycle - 18) / 3); wB = 1 - t; wC = t; }
-  else if (cycle < 29)  { wC = 1; }
-  else                  { const t = easeInOut((cycle - 29) / 3); wC = 1 - t; wA = t; }
+  const { wN, wG, wD, wM, wB, wA, wE } = getWeights(cycleTime);
 
   ctx.clearRect(0, 0, W, H);
 
-  /* Update free-floating positions (always running) */
+  // Update free-floating positions (drives neural-network phase)
   for (const d of dots) {
     d.x += d.vx; d.y += d.vy;
     if (d.x < 0 || d.x > W) d.vx *= -1;
     if (d.y < 0 || d.y > H) d.vy *= -1;
   }
 
-  /* Compute display positions */
+  // ── Compute blended display position for each dot ─────────────
   const display = dots.map(d => {
-    /* Globe coords */
-    const rx = d.sx * cosY + d.sz * sinY;
-    const rz = -d.sx * sinY + d.sz * cosY;
-    const gx = cx + rx * globeR;
-    const gy = cy + d.sy * globeR;
-    /* Boat coords */
-    const bx = cx + d.bx * boatScale;
-    const by = cy + d.by * boatScale * 0.85;
-    /* Network coords */
-    const nx = d.x, ny = d.y;
-    const x = nx * wA + gx * wB + bx * wC;
-    const y = ny * wA + gy * wB + by * wC;
-    return {
-      x, y, r: d.r,
-      depth: rz,
-      visible: wB < 0.5 ? true : (rz > -0.2)
-    };
+    // Globe (Y-axis rotation)
+    const rx  = d.sx*cosY + d.sz*sinY;
+    const rz  = -d.sx*sinY + d.sz*cosY;
+    const gx  = cx + rx*globeR;
+    const gy  = cy + d.sy*globeR;
+
+    const x = d.x           * wN
+             + gx            * wG
+             + (cx + d.dx    * scale*0.82) * wD
+             + (cx + d.mc_x  * scale*0.72) * wM
+             + (cx + d.bx    * scale*0.72) * wB
+             + (cx + d.ax    * scale*0.78) * wA
+             + (cx + d.ex    * scale*0.78) * wE;
+
+    const y = d.y           * wN
+             + gy            * wG
+             + (cy + d.dy    * scale*0.82) * wD
+             + (cy + d.mc_y  * scale*0.72) * wM
+             + (cy + d.by    * scale*0.72) * wB
+             + (cy + d.ay    * scale*0.78) * wA
+             + (cy + d.ey    * scale*0.78) * wE;
+
+    return { x, y, r: d.r, depth: rz };
   });
 
-  /* Draw connections (skip during boat phase for clarity) */
-  if (wC < 0.6) {
-    const maxDist = 140;
+  // ── Draw connections (meaningful for network, globe, DNA) ──────
+  const connW = wN + wG*0.42 + wD*0.48;
+  if (connW > 0.05) {
+    const maxDist = 130 + wN*50;
     for (let i = 0; i < display.length; i++) {
-      const a = display[i];
-      if (!a.visible) continue;
-      for (let j = i + 1; j < display.length; j++) {
-        const b = display[j];
-        if (!b.visible) continue;
-        const dx = a.x - b.x, dy = a.y - b.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
+      for (let j = i+1; j < display.length; j++) {
+        const a = display[i], b = display[j];
+        const ddx = a.x-b.x, ddy = a.y-b.y;
+        const dist = Math.sqrt(ddx*ddx + ddy*ddy);
         if (dist < maxDist) {
           ctx.beginPath();
-          if (wB > 0.5 && Math.random() < 0.55) {
-            const mx = (a.x + b.x) / 2;
-            const my = (a.y + b.y) / 2 - dist * 0.25;
-            ctx.moveTo(a.x, a.y);
-            ctx.quadraticCurveTo(mx, my, b.x, b.y);
-          } else {
-            ctx.moveTo(a.x, a.y);
-            ctx.lineTo(b.x, b.y);
-          }
-          const lineAlpha = 0.55 * (1 - dist / maxDist) * (1 - wC);
-          ctx.strokeStyle = `rgba(14,244,200,${lineAlpha})`;
-          ctx.lineWidth = 1.5;
-          ctx.stroke();
+          ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
+          ctx.strokeStyle = `rgba(14,244,200,${0.42*(1-dist/maxDist)*connW})`;
+          ctx.lineWidth = 1.2; ctx.stroke();
         }
       }
     }
   }
 
-  /* Draw dots */
+  // ── Draw dots ─────────────────────────────────────────────────
   for (const p of display) {
-    if (!p.visible) continue;
-    const depthScale = wB > 0 ? (0.6 + 0.4 * ((p.depth + 1) / 2)) : 1;
-    const alpha = 0.75 * depthScale;
+    const depthScale = wG > 0.15 ? (0.50 + 0.50*((p.depth+1)/2)) : 1;
     ctx.beginPath();
-    ctx.arc(p.x, p.y, p.r * depthScale, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(14,244,200,${alpha})`;
+    ctx.arc(p.x, p.y, p.r*depthScale, 0, Math.PI*2);
+    ctx.fillStyle = `rgba(14,244,200,${0.74*depthScale})`;
     ctx.fill();
   }
 
-  /* Draw water reflection line + birds during boat phase */
-  if (wC > 0.1) {
-    /* Subtle water line beneath boat */
-    ctx.beginPath();
-    ctx.moveTo(cx - boatScale * 1.1, cy + boatScale * 0.42);
-    ctx.lineTo(cx + boatScale * 1.1, cy + boatScale * 0.42);
-    ctx.strokeStyle = `rgba(14,244,200,${0.25 * wC})`;
-    ctx.lineWidth = 1;
-    ctx.stroke();
-
-    /* Birds — only fully visible during boat phase */
-    for (const b of birds) {
-      b.x += b.speed;
-      b.flap += b.flapSpeed;
-      if (b.x > W + 50) {
-        b.x = -50;
-        b.y = H * (0.15 + Math.random() * 0.25);
-      }
-      ctx.save();
-      ctx.globalAlpha = wC;
-      drawBird(b);
-      ctx.restore();
+  // ── Phase 2: Orbiting satellites around globe ─────────────────
+  if (wG > 0.04) {
+    const satCfg = [
+      { speed:0.40, phase:0,              size:5.5 },
+      { speed:0.62, phase:Math.PI*0.67,   size:4.5 },
+      { speed:0.28, phase:Math.PI*1.34,   size:4.0 },
+    ];
+    for (const s of satCfg) {
+      const angle  = elapsed*s.speed + s.phase;
+      const orbitR = globeR*1.32;
+      const sx = cx + Math.cos(angle)*orbitR;
+      const sy = cy + Math.sin(angle)*orbitR*0.42; // perspective flatten
+      drawSatellite(sx, sy, s.size, wG*0.80, angle + Math.PI*0.5);
     }
   }
+
+  // ── Phase 6: AI symbol overlay ────────────────────────────────
+  drawAIOverlay(wA, elapsed);
+
+  // ── Phase 7: ECG glowing trace overlay ───────────────────────
+  drawECGOverlay(wE, cycleTime);
 
   requestAnimationFrame(draw);
 }
 
+// ── Bootstrap ────────────────────────────────────────────────────
 resize();
-dots = makeDots(NUM_DOTS);
-birds = makeBirds(4);
+dots      = makeDots(NUM_DOTS);
 startTime = performance.now();
 draw();
 window.addEventListener('resize', () => { resize(); dots = makeDots(NUM_DOTS); });
 </script>
+  
 </body>
 </html>
