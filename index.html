@@ -1406,12 +1406,12 @@ footer span { color: var(--teal); }
 </footer>
 <script>
 // ================================================================
-// HERO CANVAS ANIMATION — FINAL REVISED
+// HERO CANVAS ANIMATION — DNA FIXED
 //
 // Sequence:
 // 1. Neural Network
 // 2. Globe + Bigger Satellites
-// 3. DNA Helix
+// 3. DNA Helix  (line helix + helix-shaped network together)
 // 4. Solid Bar Chart + Network Background
 // 5. AI Circular Symbol
 // 6. Full ECG Heartbeat + Network Background
@@ -1476,25 +1476,39 @@ function fibonacciSphere(n) {
   return pts;
 }
 
-/* DNA target kept simple so transition works without duplicate visual */
+/* DNA points — widened so network follows helix, not center blob */
 function dnaPoints(n) {
   const pts = [];
   const turns = 2.25;
   const height = 1.80;
-  const amp = 0.20;
-  for (let i = 0; i < n; i++) {
-    const p = i / Math.max(1, n - 1);
+  const amp = 0.34;
+  const rows = Math.floor(n / 2);
+
+  for (let i = 0; i < rows; i++) {
+    const p = i / Math.max(1, rows - 1);
     const y = -height / 2 + p * height;
     const a = p * Math.PI * 2 * turns;
-    pts.push({
-      x: Math.sin(a) * amp * (i % 2 === 0 ? 1 : -1),
-      y
-    });
+    const x1 = Math.sin(a) * amp;
+    const x2 = -Math.sin(a) * amp;
+
+    pts.push({ x: x1, y });
+    pts.push({ x: x2, y });
+
+    if (i % 4 === 0) {
+      const rungCount = 2;
+      for (let k = 1; k <= rungCount; k++) {
+        const rt = k / (rungCount + 1);
+        pts.push({
+          x: x1 + (x2 - x1) * rt,
+          y
+        });
+      }
+    }
   }
-  return pts;
+
+  return pts.slice(0, n);
 }
 
-/* chart + heartbeat targets intentionally compact to avoid duplicate dots */
 function centerClusterPoints(n, spread = 0.10) {
   const pts = [];
   for (let i = 0; i < n; i++) {
@@ -1592,7 +1606,6 @@ function getWeights(c) {
 /* ============================================================
    DRAW HELPERS
 ============================================================ */
-
 function drawSatellite(x, y, size, alpha, tilt) {
   ctx.save();
   ctx.translate(x, y);
@@ -1689,7 +1702,6 @@ function drawDNAOverlay(wD, elapsed) {
   ctx.restore();
 }
 
-/* solid bars only — no bar dots */
 function drawSolidBarsOverlay(wB) {
   if (wB < 0.01) return;
 
@@ -1716,7 +1728,6 @@ function drawSolidBarsOverlay(wB) {
     ctx.strokeRect(x, y, width, height);
   }
 
-  // rising line
   const points = [
     { x: CX + (-0.68) * scale, y: CY + (0.62 - 0.22 * 1.35 - 0.09) * scale },
     { x: CX + (-0.42) * scale, y: CY + (0.62 - 0.38 * 1.35 - 0.09) * scale },
@@ -1789,7 +1800,6 @@ function drawAIOverlay(wA, elapsed) {
   ctx.restore();
 }
 
-/* full heartbeat visible, not half */
 function drawFullECGOverlay(wE, elapsed) {
   if (wE < 0.01) return;
 
@@ -1818,7 +1828,6 @@ function drawFullECGOverlay(wE, elapsed) {
   ctx.shadowColor = '#0ef4c8';
   ctx.shadowBlur = 16;
 
-  // glow pass
   ctx.beginPath();
   ctx.lineWidth = 9;
   ctx.strokeStyle = `rgba(14,244,200,${0.09 * wE})`;
@@ -1832,7 +1841,6 @@ function drawFullECGOverlay(wE, elapsed) {
   }
   ctx.stroke();
 
-  // main line
   ctx.beginPath();
   ctx.lineWidth = 3.0;
   ctx.strokeStyle = '#0ef4c8';
@@ -1846,7 +1854,6 @@ function drawFullECGOverlay(wE, elapsed) {
   }
   ctx.stroke();
 
-  // moving cursor
   const cursorT = (elapsed * 0.35) % 1;
   const cycX = (cursorT * cycles + phase) % 1;
   const dotX = left + cursorT * width;
@@ -1861,12 +1868,12 @@ function drawFullECGOverlay(wE, elapsed) {
   ctx.restore();
 }
 
-/* exactly neural-style background network */
 function drawBackgroundNetwork(strength = 1) {
   if (strength <= 0.01) return;
 
   const maxDist = 180;
   const alphaBase = 0.34 * strength;
+  const elapsed = (performance.now() - startTime) / 1000;
 
   for (let i = 0; i < dots.length; i++) {
     for (let j = i + 1; j < dots.length; j++) {
@@ -1885,7 +1892,6 @@ function drawBackgroundNetwork(strength = 1) {
     }
   }
 
-  const elapsed = (performance.now() - startTime) / 1000;
   for (let i = 0; i < dots.length; i++) {
     const p = dots[i];
     const pulse = 0.88 + Math.sin(elapsed * 1.7 + i * 0.15) * 0.12;
@@ -1920,8 +1926,7 @@ function draw() {
     if (d.y < 0 || d.y > H) d.vy *= -1;
   }
 
-  // network background only during chart + heartbeat
-  drawBackgroundNetwork(wB * 1.0 + wE * 1.0);
+  drawBackgroundNetwork(wB + wE);
 
   const display = dots.map(d => {
     const rx = d.sx * cosY + d.sz * sinY;
@@ -1932,16 +1937,16 @@ function draw() {
     const x = d.x * wN
             + gx * wG
             + (CX + d.dx * scale * 0.82) * wD
-            + (CX + d.bx * scale * 0.30) * wB
+            + (CX + d.bx * scale * 0.22) * wB
             + (CX + d.ax * scale * 0.78) * wA
-            + (CX + d.ex * scale * 0.20) * wE;
+            + (CX + d.ex * scale * 0.10) * wE;
 
     const y = d.y * wN
             + gy * wG
             + (CY + d.dy * scale * 0.82) * wD
-            + (CY + d.by * scale * 0.30) * wB
+            + (CY + d.by * scale * 0.22) * wB
             + (CY + d.ay * scale * 0.78) * wA
-            + (CY + d.ey * scale * 0.20) * wE;
+            + (CY + d.ey * scale * 0.10) * wE;
 
     return { x, y, r: d.r, depth: rz };
   });
@@ -1949,10 +1954,16 @@ function draw() {
   drawDNAOverlay(wD, elapsed);
   drawSolidBarsOverlay(wB);
 
-  // only use main connections for neural + globe + DNA + AI
-  const connW = wN + wG * 0.42 + wD * 0.28 + wA * 0.14;
+  // DNA gets its own smaller-distance network so it follows helix
+  let maxDist = 130 + wN * 50;
+  let connW = wN + wG * 0.42 + wA * 0.14;
+
+  if (wD > 0.05) {
+    maxDist = 58;
+    connW += wD * 0.60;
+  }
+
   if (connW > 0.05) {
-    const maxDist = 130 + wN * 50;
     for (let i = 0; i < display.length; i++) {
       for (let j = i + 1; j < display.length; j++) {
         const a = display[i], b = display[j];
@@ -1971,8 +1982,8 @@ function draw() {
     }
   }
 
-  // suppress duplicate dots during DNA / chart / heartbeat
-  const foregroundAlpha = 1 - (wD * 0.78 + wB * 0.96 + wE * 0.98);
+  // keep DNA dots visible, hide duplicates only on chart/heartbeat
+  const foregroundAlpha = 1 - (wB * 0.96 + wE * 0.98);
 
   if (foregroundAlpha > 0.02) {
     for (const p of display) {
@@ -2019,6 +2030,5 @@ window.addEventListener('resize', () => {
   dots = makeDots(NUM_DOTS);
 });
 </script>
-  
 </body>
 </html>
