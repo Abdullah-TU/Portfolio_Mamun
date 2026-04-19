@@ -1406,15 +1406,15 @@ footer span { color: var(--teal); }
 </footer>
 <script>
 // ================================================================
-// HERO CANVAS ANIMATION — UPDATED
+// HERO CANVAS ANIMATION — FINAL REVISED
 //
 // Sequence:
 // 1. Neural Network
 // 2. Globe + Bigger Satellites
 // 3. DNA Helix
-// 4. Filled Bar Chart / Rising Trend  + network background
+// 4. Solid Bar Chart + Network Background
 // 5. AI Circular Symbol
-// 6. ECG Heartbeat + network background
+// 6. Full ECG Heartbeat + Network Background
 // 7. Back to Neural Network
 // ================================================================
 
@@ -1464,8 +1464,6 @@ function clamp(v, min, max) {
 /* ============================================================
    SHAPE GENERATORS
 ============================================================ */
-
-/* ── Globe ────────────────────────────────────────────────── */
 function fibonacciSphere(n) {
   const pts = [];
   const phi = Math.PI * (3 - Math.sqrt(5));
@@ -1478,85 +1476,38 @@ function fibonacciSphere(n) {
   return pts;
 }
 
-/* ── DNA (exact style you wanted) ─────────────────────────── */
+/* DNA target kept simple so transition works without duplicate visual */
 function dnaPoints(n) {
   const pts = [];
   const turns = 2.25;
   const height = 1.80;
-  const amp = 0.34;
-  const rows = Math.floor(n / 2);
-
-  for (let i = 0; i < rows; i++) {
-    const p = i / Math.max(1, rows - 1);
+  const amp = 0.20;
+  for (let i = 0; i < n; i++) {
+    const p = i / Math.max(1, n - 1);
     const y = -height / 2 + p * height;
     const a = p * Math.PI * 2 * turns;
-    const x1 = Math.sin(a) * amp;
-    const x2 = -Math.sin(a) * amp;
-
-    pts.push({ x: x1, y });
-    pts.push({ x: x2, y });
-
-    if (i % 4 === 0) {
-      const rungCount = 2;
-      for (let k = 1; k <= rungCount; k++) {
-        const rt = k / (rungCount + 1);
-        pts.push({
-          x: x1 + (x2 - x1) * rt,
-          y
-        });
-      }
-    }
-  }
-
-  return pts.slice(0, n);
-}
-
-/* ── Filled Bar Chart ─────────────────────────────────────── */
-function barChartPoints(n) {
-  const pts = [];
-  const cols = 6;
-  const bH = [0.22, 0.38, 0.54, 0.68, 0.82, 0.96];
-  const bX = [-0.68, -0.42, -0.16, 0.10, 0.36, 0.62];
-  const baseY = 0.62;
-  const barW = 0.13;
-
-  const totalBarDots = Math.floor(n * 0.94);
-  const perBar = Math.floor(totalBarDots / cols);
-
-  for (let b = 0; b < cols; b++) {
-    const topY = baseY - bH[b] * 1.35;
-    const gridCols = 6;
-    const gridRows = Math.max(4, Math.ceil(perBar / gridCols));
-
-    for (let i = 0; i < perBar; i++) {
-      const gx = i % gridCols;
-      const gy = Math.floor(i / gridCols);
-
-      pts.push({
-        x: bX[b] - barW / 2 + (gx / Math.max(1, gridCols - 1)) * barW + (Math.random() - 0.5) * 0.010,
-        y: baseY - (gy / Math.max(1, gridRows - 1)) * (baseY - topY) + (Math.random() - 0.5) * 0.010
-      });
-    }
-  }
-
-  const trendDots = n - pts.length;
-  for (let i = 0; i < trendDots; i++) {
-    const t = i / Math.max(1, trendDots - 1);
-    const idx = t * (cols - 1);
-    const bi = Math.min(Math.floor(idx), cols - 2);
-    const bf = idx - bi;
-    const h = bH[bi] * (1 - bf) + bH[bi + 1] * bf;
-
     pts.push({
-      x: bX[0] + t * (bX[cols - 1] - bX[0]),
-      y: baseY - h * 1.35 - 0.09 + (Math.random() - 0.5) * 0.018
+      x: Math.sin(a) * amp * (i % 2 === 0 ? 1 : -1),
+      y
     });
   }
-
-  return pts.slice(0, n);
+  return pts;
 }
 
-/* ── AI Symbol ────────────────────────────────────────────── */
+/* chart + heartbeat targets intentionally compact to avoid duplicate dots */
+function centerClusterPoints(n, spread = 0.10) {
+  const pts = [];
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * Math.PI * 2;
+    const r = spread * (0.3 + 0.7 * ((i % 11) / 10));
+    pts.push({
+      x: Math.cos(a) * r,
+      y: Math.sin(a) * r
+    });
+  }
+  return pts;
+}
+
 function aiPoints(n) {
   const pts = [];
   const rings = [
@@ -1590,41 +1541,15 @@ function aiPoints(n) {
   return pts.slice(0, n);
 }
 
-/* ── ECG ──────────────────────────────────────────────────── */
-function ecgPoints(n) {
-  function ecgY(x) {
-    if (x < 0.10) return  Math.sin(x / 0.10 * Math.PI) * 0.07;
-    if (x < 0.25) return  0;
-    if (x < 0.30) return -Math.sin((x - 0.25) / 0.05 * Math.PI) * 0.18;
-    if (x < 0.35) return  Math.sin((x - 0.30) / 0.05 * Math.PI) * 1.00;
-    if (x < 0.42) return -Math.sin((x - 0.35) / 0.07 * Math.PI) * 0.14;
-    if (x < 0.58) return  0;
-    if (x < 0.78) return  Math.sin((x - 0.58) / 0.20 * Math.PI) * 0.22;
-    return 0;
-  }
-
-  const cycles = 2.5;
-  const pts = [];
-  for (let i = 0; i < n; i++) {
-    const t = i / (n - 1);
-    const cx = (t * cycles) % 1;
-    pts.push({
-      x: -0.88 + t * 1.76,
-      y: -ecgY(cx) * 0.80 + (Math.random() - 0.5) * 0.012
-    });
-  }
-  return pts;
-}
-
 /* ============================================================
    DOTS
 ============================================================ */
 function makeDots(n) {
   const sph = fibonacciSphere(n);
   const dna = dnaPoints(n);
-  const bar = barChartPoints(n);
+  const chart = centerClusterPoints(n, 0.08);
   const ai = aiPoints(n);
-  const ecg = ecgPoints(n);
+  const heartbeat = centerClusterPoints(n, 0.06);
 
   return Array.from({ length: n }, (_, i) => ({
     x: Math.random() * W,
@@ -1635,9 +1560,9 @@ function makeDots(n) {
 
     sx: sph[i].x, sy: sph[i].y, sz: sph[i].z,
     dx: dna[i].x, dy: dna[i].y,
-    bx: bar[i].x, by: bar[i].y,
+    bx: chart[i].x, by: chart[i].y,
     ax: ai[i].x, ay: ai[i].y,
-    ex: ecg[i].x, ey: ecg[i].y
+    ex: heartbeat[i].x, ey: heartbeat[i].y
   }));
 }
 
@@ -1708,7 +1633,6 @@ function drawSatellite(x, y, size, alpha, tilt) {
   ctx.restore();
 }
 
-/* DNA overlay — exact style requested */
 function drawDNAOverlay(wD, elapsed) {
   if (wD < 0.01) return;
 
@@ -1756,7 +1680,6 @@ function drawDNAOverlay(wD, elapsed) {
     const a = p * Math.PI * 2 * turns + elapsed * 1.2;
     const x1 = CX + Math.sin(a) * amp;
     const x2 = CX - Math.sin(a) * amp;
-
     ctx.beginPath();
     ctx.moveTo(x1, y);
     ctx.lineTo(x2, y);
@@ -1766,7 +1689,8 @@ function drawDNAOverlay(wD, elapsed) {
   ctx.restore();
 }
 
-function drawFilledBarsOverlay(wB) {
+/* solid bars only — no bar dots */
+function drawSolidBarsOverlay(wB) {
   if (wB < 0.01) return;
 
   const scale = Math.min(W, H) * 0.38 * 0.72;
@@ -1777,7 +1701,7 @@ function drawFilledBarsOverlay(wB) {
   const barW = 0.13;
 
   ctx.save();
-  ctx.globalAlpha = 0.38 * wB;
+  ctx.globalAlpha = wB;
 
   for (let i = 0; i < cols; i++) {
     const x = CX + (bX[i] - barW / 2) * scale;
@@ -1785,11 +1709,37 @@ function drawFilledBarsOverlay(wB) {
     const width = barW * scale;
     const height = (bH[i] * 1.35) * scale;
 
-    ctx.fillStyle = 'rgba(14,244,200,0.28)';
-    ctx.strokeStyle = 'rgba(14,244,200,0.34)';
-    ctx.lineWidth = 1.2;
+    ctx.fillStyle = 'rgba(14,244,200,0.16)';
+    ctx.strokeStyle = 'rgba(14,244,200,0.28)';
+    ctx.lineWidth = 1.4;
     ctx.fillRect(x, y, width, height);
     ctx.strokeRect(x, y, width, height);
+  }
+
+  // rising line
+  const points = [
+    { x: CX + (-0.68) * scale, y: CY + (0.62 - 0.22 * 1.35 - 0.09) * scale },
+    { x: CX + (-0.42) * scale, y: CY + (0.62 - 0.38 * 1.35 - 0.09) * scale },
+    { x: CX + (-0.16) * scale, y: CY + (0.62 - 0.54 * 1.35 - 0.09) * scale },
+    { x: CX + ( 0.10) * scale, y: CY + (0.62 - 0.68 * 1.35 - 0.09) * scale },
+    { x: CX + ( 0.36) * scale, y: CY + (0.62 - 0.82 * 1.35 - 0.09) * scale },
+    { x: CX + ( 0.62) * scale, y: CY + (0.62 - 0.96 * 1.35 - 0.09) * scale }
+  ];
+
+  ctx.shadowColor = '#0ef4c8';
+  ctx.shadowBlur = 12;
+  ctx.strokeStyle = 'rgba(14,244,200,0.75)';
+  ctx.lineWidth = 2.0;
+  ctx.beginPath();
+  ctx.moveTo(points[0].x, points[0].y);
+  for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
+  ctx.stroke();
+
+  for (const p of points) {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 3.5, 0, Math.PI * 2);
+    ctx.fillStyle = '#0ef4c8';
+    ctx.fill();
   }
 
   ctx.restore();
@@ -1839,12 +1789,14 @@ function drawAIOverlay(wA, elapsed) {
   ctx.restore();
 }
 
-function drawECGOverlay(wE, cycleTime) {
+/* full heartbeat visible, not half */
+function drawFullECGOverlay(wE, elapsed) {
   if (wE < 0.01) return;
 
-  const sX = W * 0.43, sY = H * 0.36;
-  const phaseElapsed = Math.max(0, cycleTime - 54);
-  const progress = Math.min(1, (phaseElapsed % 4) / 4);
+  const left = W * 0.04;
+  const width = W * 0.92;
+  const yMid = H * 0.47;
+  const amp = Math.min(W, H) * 0.12;
 
   function ecgY(x) {
     if (x < 0.10) return  Math.sin(x / 0.10 * Math.PI) * 0.07;
@@ -1857,53 +1809,64 @@ function drawECGOverlay(wE, cycleTime) {
     return 0;
   }
 
-  const cycles = 2.5, steps = 320;
+  const cycles = 3.2;
+  const steps = 520;
+  const phase = (elapsed * 0.28) % 1;
 
   ctx.save();
-  ctx.globalAlpha = wE * 0.88;
+  ctx.globalAlpha = wE * 0.92;
   ctx.shadowColor = '#0ef4c8';
-  ctx.shadowBlur = 15;
-  ctx.strokeStyle = '#0ef4c8';
-  ctx.lineWidth = 2.4;
-  ctx.beginPath();
+  ctx.shadowBlur = 16;
 
-  let started = false;
+  // glow pass
+  ctx.beginPath();
+  ctx.lineWidth = 9;
+  ctx.strokeStyle = `rgba(14,244,200,${0.09 * wE})`;
   for (let i = 0; i <= steps; i++) {
     const t = i / steps;
-    if (t > progress) break;
-    const cycX = (t * cycles) % 1;
-    const px = CX + (-0.88 + t * 1.76) * sX;
-    const py = CY + (-ecgY(cycX) * 0.80) * sY;
-    if (!started) {
-      ctx.moveTo(px, py);
-      started = true;
-    } else {
-      ctx.lineTo(px, py);
-    }
+    const cycX = (t * cycles + phase) % 1;
+    const x = left + t * width;
+    const y = yMid + (-ecgY(cycX) * 0.80) * amp;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
   }
   ctx.stroke();
 
-  if (progress > 0 && progress < 1) {
-    const t = progress;
-    const cycX = (t * cycles) % 1;
-    const dotX = CX + (-0.88 + t * 1.76) * sX;
-    const dotY = CY + (-ecgY(cycX) * 0.80) * sY;
-    ctx.beginPath();
-    ctx.arc(dotX, dotY, 5, 0, Math.PI * 2);
-    ctx.fillStyle = '#0ef4c8';
-    ctx.shadowBlur = 22;
-    ctx.fill();
+  // main line
+  ctx.beginPath();
+  ctx.lineWidth = 3.0;
+  ctx.strokeStyle = '#0ef4c8';
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    const cycX = (t * cycles + phase) % 1;
+    const x = left + t * width;
+    const y = yMid + (-ecgY(cycX) * 0.80) * amp;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
   }
+  ctx.stroke();
+
+  // moving cursor
+  const cursorT = (elapsed * 0.35) % 1;
+  const cycX = (cursorT * cycles + phase) % 1;
+  const dotX = left + cursorT * width;
+  const dotY = yMid + (-ecgY(cycX) * 0.80) * amp;
+
+  ctx.beginPath();
+  ctx.arc(dotX, dotY, 5, 0, Math.PI * 2);
+  ctx.fillStyle = '#0ef4c8';
+  ctx.shadowBlur = 24;
+  ctx.fill();
 
   ctx.restore();
 }
 
-/* background network exactly like neural stage */
+/* exactly neural-style background network */
 function drawBackgroundNetwork(strength = 1) {
   if (strength <= 0.01) return;
 
   const maxDist = 180;
-  const alphaBase = 0.32 * strength;
+  const alphaBase = 0.34 * strength;
 
   for (let i = 0; i < dots.length; i++) {
     for (let j = i + 1; j < dots.length; j++) {
@@ -1911,7 +1874,6 @@ function drawBackgroundNetwork(strength = 1) {
       const dx = a.x - b.x;
       const dy = a.y - b.y;
       const dd = Math.sqrt(dx * dx + dy * dy);
-
       if (dd < maxDist) {
         ctx.beginPath();
         ctx.moveTo(a.x, a.y);
@@ -1923,12 +1885,13 @@ function drawBackgroundNetwork(strength = 1) {
     }
   }
 
+  const elapsed = (performance.now() - startTime) / 1000;
   for (let i = 0; i < dots.length; i++) {
     const p = dots[i];
-    const pulse = 0.88 + Math.sin((performance.now() - startTime) / 1000 * 1.7 + i * 0.15) * 0.12;
+    const pulse = 0.88 + Math.sin(elapsed * 1.7 + i * 0.15) * 0.12;
     ctx.beginPath();
     ctx.arc(p.x, p.y, p.r * pulse, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(14,244,200,${0.38 * strength})`;
+    ctx.fillStyle = `rgba(14,244,200,${0.40 * strength})`;
     ctx.fill();
   }
 }
@@ -1950,7 +1913,6 @@ function draw() {
 
   ctx.clearRect(0, 0, W, H);
 
-  // update free-floating network dots always
   for (const d of dots) {
     d.x += d.vx;
     d.y += d.vy;
@@ -1958,8 +1920,8 @@ function draw() {
     if (d.y < 0 || d.y > H) d.vy *= -1;
   }
 
-  // show background neural network during bar + heartbeat stages
-  drawBackgroundNetwork(wB * 0.95 + wE * 0.95);
+  // network background only during chart + heartbeat
+  drawBackgroundNetwork(wB * 1.0 + wE * 1.0);
 
   const display = dots.map(d => {
     const rx = d.sx * cosY + d.sz * sinY;
@@ -1970,24 +1932,25 @@ function draw() {
     const x = d.x * wN
             + gx * wG
             + (CX + d.dx * scale * 0.82) * wD
-            + (CX + d.bx * scale * 0.72) * wB
+            + (CX + d.bx * scale * 0.30) * wB
             + (CX + d.ax * scale * 0.78) * wA
-            + (CX + d.ex * scale * 0.78) * wE;
+            + (CX + d.ex * scale * 0.20) * wE;
 
     const y = d.y * wN
             + gy * wG
             + (CY + d.dy * scale * 0.82) * wD
-            + (CY + d.by * scale * 0.72) * wB
+            + (CY + d.by * scale * 0.30) * wB
             + (CY + d.ay * scale * 0.78) * wA
-            + (CY + d.ey * scale * 0.78) * wE;
+            + (CY + d.ey * scale * 0.20) * wE;
 
     return { x, y, r: d.r, depth: rz };
   });
 
-  drawFilledBarsOverlay(wB);
   drawDNAOverlay(wD, elapsed);
+  drawSolidBarsOverlay(wB);
 
-  const connW = wN + wG * 0.42 + wD * 0.50;
+  // only use main connections for neural + globe + DNA + AI
+  const connW = wN + wG * 0.42 + wD * 0.28 + wA * 0.14;
   if (connW > 0.05) {
     const maxDist = 130 + wN * 50;
     for (let i = 0; i < display.length; i++) {
@@ -2008,17 +1971,22 @@ function draw() {
     }
   }
 
-  for (const p of display) {
-    const depthScale = wG > 0.15 ? (0.50 + 0.50 * ((p.depth + 1) / 2)) : 1;
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.r * depthScale, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(14,244,200,${0.74 * depthScale})`;
-    ctx.fill();
+  // suppress duplicate dots during DNA / chart / heartbeat
+  const foregroundAlpha = 1 - (wD * 0.78 + wB * 0.96 + wE * 0.98);
+
+  if (foregroundAlpha > 0.02) {
+    for (const p of display) {
+      const depthScale = wG > 0.15 ? (0.50 + 0.50 * ((p.depth + 1) / 2)) : 1;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r * depthScale, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(14,244,200,${0.74 * depthScale * foregroundAlpha})`;
+      ctx.fill();
+    }
   }
 
   if (wG > 0.04) {
     const satCfg = [
-      { speed: 0.40, phase: 0,            size: 27.5 },
+      { speed: 0.40, phase: 0,              size: 27.5 },
       { speed: 0.62, phase: Math.PI * 0.67, size: 22.5 },
       { speed: 0.28, phase: Math.PI * 1.34, size: 20.0 }
     ];
@@ -2033,7 +2001,7 @@ function draw() {
   }
 
   drawAIOverlay(wA, elapsed);
-  drawECGOverlay(wE, cycleTime);
+  drawFullECGOverlay(wE, elapsed);
 
   requestAnimationFrame(draw);
 }
