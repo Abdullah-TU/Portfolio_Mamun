@@ -1406,7 +1406,7 @@ footer span { color: var(--teal); }
 </footer>
 <script>
 // ================================================================
-// HERO CANVAS ANIMATION — DNA FIXED
+// HERO CANVAS ANIMATION — FINAL FULL SCRIPT
 //
 // Sequence:
 // 1. Neural Network
@@ -1476,7 +1476,7 @@ function fibonacciSphere(n) {
   return pts;
 }
 
-/* DNA points — widened so network follows helix, not center blob */
+/* DNA points — widened so network follows helix */
 function dnaPoints(n) {
   const pts = [];
   const turns = 2.25;
@@ -1715,14 +1715,26 @@ function drawSolidBarsOverlay(wB) {
   ctx.save();
   ctx.globalAlpha = wB;
 
+  const baseLeft = CX + (bX[0] - barW * 0.9) * scale;
+  const baseRight = CX + (bX[cols - 1] + barW * 0.9) * scale;
+  const baseLineY = CY + baseY * scale;
+
+  ctx.strokeStyle = 'rgba(14,244,200,0.42)';
+  ctx.lineWidth = 2.2;
+  ctx.beginPath();
+  ctx.moveTo(baseLeft, baseLineY);
+  ctx.lineTo(baseRight, baseLineY);
+  ctx.stroke();
+
   for (let i = 0; i < cols; i++) {
-    const x = CX + (bX[i] - barW / 2) * scale;
+    const centerX = CX + bX[i] * scale;
+    const x = centerX - (barW * scale) / 2;
     const y = CY + (baseY - bH[i] * 1.35) * scale;
     const width = barW * scale;
     const height = (bH[i] * 1.35) * scale;
 
     ctx.fillStyle = 'rgba(14,244,200,0.16)';
-    ctx.strokeStyle = 'rgba(14,244,200,0.28)';
+    ctx.strokeStyle = 'rgba(14,244,200,0.30)';
     ctx.lineWidth = 1.4;
     ctx.fillRect(x, y, width, height);
     ctx.strokeRect(x, y, width, height);
@@ -1739,16 +1751,33 @@ function drawSolidBarsOverlay(wB) {
 
   ctx.shadowColor = '#0ef4c8';
   ctx.shadowBlur = 12;
-  ctx.strokeStyle = 'rgba(14,244,200,0.75)';
-  ctx.lineWidth = 2.0;
+  ctx.strokeStyle = 'rgba(14,244,200,0.82)';
+  ctx.lineWidth = 2.2;
   ctx.beginPath();
   ctx.moveTo(points[0].x, points[0].y);
   for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
   ctx.stroke();
 
+  const pLast = points[points.length - 1];
+  const pPrev = points[points.length - 2];
+  const angle = Math.atan2(pLast.y - pPrev.y, pLast.x - pPrev.x);
+  const ah = 10;
+  ctx.beginPath();
+  ctx.moveTo(pLast.x, pLast.y);
+  ctx.lineTo(
+    pLast.x - Math.cos(angle - Math.PI / 6) * ah,
+    pLast.y - Math.sin(angle - Math.PI / 6) * ah
+  );
+  ctx.moveTo(pLast.x, pLast.y);
+  ctx.lineTo(
+    pLast.x - Math.cos(angle + Math.PI / 6) * ah,
+    pLast.y - Math.sin(angle + Math.PI / 6) * ah
+  );
+  ctx.stroke();
+
   for (const p of points) {
     ctx.beginPath();
-    ctx.arc(p.x, p.y, 3.5, 0, Math.PI * 2);
+    ctx.arc(p.x, p.y, 4.2, 0, Math.PI * 2);
     ctx.fillStyle = '#0ef4c8';
     ctx.fill();
   }
@@ -1926,6 +1955,7 @@ function draw() {
     if (d.y < 0 || d.y > H) d.vy *= -1;
   }
 
+  // network background only during chart + heartbeat
   drawBackgroundNetwork(wB + wE);
 
   const display = dots.map(d => {
@@ -1954,7 +1984,6 @@ function draw() {
   drawDNAOverlay(wD, elapsed);
   drawSolidBarsOverlay(wB);
 
-  // DNA gets its own smaller-distance network so it follows helix
   let maxDist = 130 + wN * 50;
   let connW = wN + wG * 0.42 + wA * 0.14;
 
@@ -1982,7 +2011,6 @@ function draw() {
     }
   }
 
-  // keep DNA dots visible, hide duplicates only on chart/heartbeat
   const foregroundAlpha = 1 - (wB * 0.96 + wE * 0.98);
 
   if (foregroundAlpha > 0.02) {
