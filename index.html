@@ -1545,21 +1545,6 @@ footer span { color: var(--teal); }
   <span>Md. Abdullah-Al Mamun</span> · Data Scientist &amp; Researcher · Salo, Finland · 2026
 </footer>
 <script>
-// ================================================================
-// HERO CANVAS ANIMATION — FINAL FULL SCRIPT (NO AI PHASE)
-//
-// Sequence:
-// 1. Neural Network
-// 2. Globe + Bigger Satellites
-// 3. DNA Helix
-// 4. Solid Bar Chart + Network Background
-// 5. Full ECG Heartbeat + Network Background
-// 6. Back to Neural Network
-// ================================================================
-
-/* ============================================================
-   UI INTERACTIONS
-============================================================ */
 function togglePub(el) {
   const isOpen = el.classList.contains('open');
   document.querySelectorAll('.pub-item').forEach(p => p.classList.remove('open'));
@@ -1574,15 +1559,12 @@ const observer = new IntersectionObserver(entries => {
 
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-/* ============================================================
-   CANVAS SETUP
-============================================================ */
 const canvas = document.getElementById('neural');
 const ctx = canvas.getContext('2d');
 
 let W, H, CX, CY, dots, startTime;
 
-const NUM_DOTS = 120;
+const NUM_DOTS = 200;
 const CYCLE = 57;
 
 function resize() {
@@ -1596,13 +1578,6 @@ function easeInOut(t) {
   return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
 }
 
-function clamp(v, min, max) {
-  return Math.max(min, Math.min(max, v));
-}
-
-/* ============================================================
-   SHAPE GENERATORS
-============================================================ */
 function fibonacciSphere(n) {
   const pts = [];
   const phi = Math.PI * (3 - Math.sqrt(5));
@@ -1615,57 +1590,18 @@ function fibonacciSphere(n) {
   return pts;
 }
 
-function dnaPoints(n) {
-  const pts = [];
-  const turns = 2.25;
-  const height = 1.80;
-  const amp = 0.34;
-  const rows = Math.floor(n / 2);
-
-  for (let i = 0; i < rows; i++) {
-    const p = i / Math.max(1, rows - 1);
-    const y = -height / 2 + p * height;
-    const a = p * Math.PI * 2 * turns;
-    const x1 = Math.sin(a) * amp;
-    const x2 = -Math.sin(a) * amp;
-
-    pts.push({ x: x1, y });
-    pts.push({ x: x2, y });
-
-    if (i % 4 === 0) {
-      const rungCount = 2;
-      for (let k = 1; k <= rungCount; k++) {
-        const rt = k / (rungCount + 1);
-        pts.push({
-          x: x1 + (x2 - x1) * rt,
-          y
-        });
-      }
-    }
-  }
-
-  return pts.slice(0, n);
-}
-
 function centerClusterPoints(n, spread = 0.10) {
   const pts = [];
   for (let i = 0; i < n; i++) {
     const a = (i / n) * Math.PI * 2;
     const r = spread * (0.3 + 0.7 * ((i % 11) / 10));
-    pts.push({
-      x: Math.cos(a) * r,
-      y: Math.sin(a) * r
-    });
+    pts.push({ x: Math.cos(a) * r, y: Math.sin(a) * r });
   }
   return pts;
 }
 
-/* ============================================================
-   DOTS
-============================================================ */
 function makeDots(n) {
   const sph = fibonacciSphere(n);
-  const dna = dnaPoints(n);
   const chart = centerClusterPoints(n, 0.08);
   const heartbeat = centerClusterPoints(n, 0.06);
 
@@ -1675,17 +1611,16 @@ function makeDots(n) {
     vx: (Math.random() - 0.5) * 2.5,
     vy: (Math.random() - 0.5) * 2.5,
     r: Math.random() * 2.5 + 1.5,
-
-    sx: sph[i].x, sy: sph[i].y, sz: sph[i].z,
-    dx: dna[i].x, dy: dna[i].y,
-    bx: chart[i].x, by: chart[i].y,
-    ex: heartbeat[i].x, ey: heartbeat[i].y
+    sx: sph[i % sph.length].x,
+    sy: sph[i % sph.length].y,
+    sz: sph[i % sph.length].z,
+    bx: chart[i % chart.length].x,
+    by: chart[i % chart.length].y,
+    ex: heartbeat[i % heartbeat.length].x,
+    ey: heartbeat[i % heartbeat.length].y
   }));
 }
 
-/* ============================================================
-   PHASE WEIGHTS
-============================================================ */
 function getWeights(c) {
   let wN = 0, wG = 0, wD = 0, wB = 0, wE = 0;
   const t3 = start => easeInOut((c - start) / 3);
@@ -1704,9 +1639,6 @@ function getWeights(c) {
   return { wN, wG, wD, wB, wE };
 }
 
-/* ============================================================
-   DRAW HELPERS
-============================================================ */
 function drawSatellite(x, y, size, alpha, tilt) {
   ctx.save();
   ctx.translate(x, y);
@@ -1750,56 +1682,103 @@ function drawSatellite(x, y, size, alpha, tilt) {
 function drawDNAOverlay(wD, elapsed) {
   if (wD < 0.01) return;
 
-  const turns = 2.25;
-  const height = Math.min(W, H) * 0.62;
-  const amp = Math.min(W, H) * 0.11;
-  const rows = 80;
+  const turns = 2.8;
+  const height = Math.min(W, H) * 0.78;
+  const amp = Math.min(W, H) * 0.14;
+  const rows = 160;
+  const speed = elapsed * 1.2;
+
+  const strand1 = [];
+  const strand2 = [];
+
+  for (let i = 0; i <= rows; i++) {
+    const p = i / rows;
+    const y = CY - height / 2 + p * height;
+    const a = p * Math.PI * 2 * turns + speed;
+
+    const cosA = Math.cos(a);
+    const sinA = Math.sin(a);
+
+    const x1 = CX + sinA * amp;
+    const z1 = cosA;
+    strand1.push({ x: x1, y, z: z1 });
+
+    const x2 = CX + Math.sin(a + Math.PI) * amp;
+    const z2 = Math.cos(a + Math.PI);
+    strand2.push({ x: x2, y, z: z2 });
+  }
 
   ctx.save();
-  ctx.strokeStyle = '#0ef4c8';
-  ctx.shadowColor = '#0ef4c8';
-  ctx.shadowBlur = 12;
 
-  ctx.beginPath();
-  ctx.lineWidth = 1.5;
-  ctx.globalAlpha = wD * 0.55;
-  for (let i = 0; i <= rows; i++) {
-    const p = i / rows;
-    const y = CY - height / 2 + p * height;
-    const a = p * Math.PI * 2 * turns + elapsed * 1.2;
-    const x = CX + Math.sin(a) * amp;
-    if (i === 0) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
-  }
-  ctx.stroke();
+  // Rungs first (behind strands)
+  for (let i = 0; i <= rows; i += 10) {
+    const p1 = strand1[i];
+    const p2 = strand2[i];
+    const avgZ = (p1.z + p2.z) / 2;
+    const depthAlpha = 0.2 + 0.5 * ((avgZ + 1) / 2);
+    const rungW = 0.6 + 0.8 * ((avgZ + 1) / 2);
 
-  ctx.beginPath();
-  ctx.lineWidth = 1.5;
-  ctx.globalAlpha = wD * 0.55;
-  for (let i = 0; i <= rows; i++) {
-    const p = i / rows;
-    const y = CY - height / 2 + p * height;
-    const a = p * Math.PI * 2 * turns + elapsed * 1.2;
-    const x = CX - Math.sin(a) * amp;
-    if (i === 0) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
-  }
-  ctx.stroke();
-
-  ctx.lineWidth = 1.0;
-  ctx.globalAlpha = wD * 0.34;
-  for (let i = 0; i <= rows; i += 5) {
-    const p = i / rows;
-    const y = CY - height / 2 + p * height;
-    const a = p * Math.PI * 2 * turns + elapsed * 1.2;
-    const x1 = CX + Math.sin(a) * amp;
-    const x2 = CX - Math.sin(a) * amp;
     ctx.beginPath();
-    ctx.moveTo(x1, y);
-    ctx.lineTo(x2, y);
+    ctx.moveTo(p1.x, p1.y);
+    ctx.lineTo(p2.x, p2.y);
+    ctx.strokeStyle = `rgba(14,244,200,${wD * depthAlpha * 0.55})`;
+    ctx.lineWidth = rungW;
+    ctx.stroke();
+
+    const nodeR1 = 2.5 + 2.5 * ((p1.z + 1) / 2);
+    const nodeR2 = 2.5 + 2.5 * ((p2.z + 1) / 2);
+    const nodeA1 = wD * (0.4 + 0.6 * ((p1.z + 1) / 2));
+    const nodeA2 = wD * (0.4 + 0.6 * ((p2.z + 1) / 2));
+
+    ctx.beginPath();
+    ctx.arc(p1.x, p1.y, nodeR1, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(14,244,200,${nodeA1})`;
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(p2.x, p2.y, nodeR2, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(7,196,160,${nodeA2})`;
+    ctx.fill();
+  }
+
+  // Strand 1 with 3D depth
+  for (let i = 0; i < rows; i++) {
+    const a = strand1[i];
+    const b = strand1[i + 1];
+    const avgZ = (a.z + b.z) / 2;
+    const depthAlpha = 0.35 + 0.65 * ((avgZ + 1) / 2);
+    const lineW = 1.2 + 1.8 * ((avgZ + 1) / 2);
+
+    ctx.beginPath();
+    ctx.moveTo(a.x, a.y);
+    ctx.lineTo(b.x, b.y);
+    ctx.strokeStyle = `rgba(14,244,200,${wD * depthAlpha * 0.9})`;
+    ctx.lineWidth = lineW;
+    ctx.shadowColor = '#0ef4c8';
+    ctx.shadowBlur = avgZ > 0 ? 12 : 0;
     ctx.stroke();
   }
 
+  // Strand 2 with 3D depth
+  ctx.shadowBlur = 0;
+  for (let i = 0; i < rows; i++) {
+    const a = strand2[i];
+    const b = strand2[i + 1];
+    const avgZ = (a.z + b.z) / 2;
+    const depthAlpha = 0.35 + 0.65 * ((avgZ + 1) / 2);
+    const lineW = 1.2 + 1.8 * ((avgZ + 1) / 2);
+
+    ctx.beginPath();
+    ctx.moveTo(a.x, a.y);
+    ctx.lineTo(b.x, b.y);
+    ctx.strokeStyle = `rgba(7,196,160,${wD * depthAlpha * 0.9})`;
+    ctx.lineWidth = lineW;
+    ctx.shadowColor = '#07c4a0';
+    ctx.shadowBlur = avgZ > 0 ? 10 : 0;
+    ctx.stroke();
+  }
+
+  ctx.shadowBlur = 0;
   ctx.restore();
 }
 
@@ -1865,15 +1844,9 @@ function drawSolidBarsOverlay(wB) {
   const ah = 10;
   ctx.beginPath();
   ctx.moveTo(pLast.x, pLast.y);
-  ctx.lineTo(
-    pLast.x - Math.cos(angle - Math.PI / 6) * ah,
-    pLast.y - Math.sin(angle - Math.PI / 6) * ah
-  );
+  ctx.lineTo(pLast.x - Math.cos(angle - Math.PI / 6) * ah, pLast.y - Math.sin(angle - Math.PI / 6) * ah);
   ctx.moveTo(pLast.x, pLast.y);
-  ctx.lineTo(
-    pLast.x - Math.cos(angle + Math.PI / 6) * ah,
-    pLast.y - Math.sin(angle + Math.PI / 6) * ah
-  );
+  ctx.lineTo(pLast.x - Math.cos(angle + Math.PI / 6) * ah, pLast.y - Math.sin(angle + Math.PI / 6) * ah);
   ctx.stroke();
 
   for (const p of points) {
@@ -1988,9 +1961,6 @@ function drawBackgroundNetwork(strength = 1) {
   }
 }
 
-/* ============================================================
-   MAIN LOOP
-============================================================ */
 function draw() {
   const elapsed = (performance.now() - startTime) / 1000;
   const cycleTime = elapsed % CYCLE;
@@ -2012,7 +1982,7 @@ function draw() {
     if (d.y < 0 || d.y > H) d.vy *= -1;
   }
 
-  drawBackgroundNetwork(wB + wE);
+  drawBackgroundNetwork(wB + wE + wD * 1.0);
 
   const display = dots.map(d => {
     const rx = d.sx * cosY + d.sz * sinY;
@@ -2020,15 +1990,15 @@ function draw() {
     const gx = CX + rx * globeR;
     const gy = CY + d.sy * globeR;
 
-    const x = d.x * wN
+    const freeW = wN + wD;
+
+    const x = d.x * freeW
             + gx * wG
-            + (CX + d.dx * scale * 0.82) * wD
             + (CX + d.bx * scale * 0.22) * wB
             + (CX + d.ex * scale * 0.10) * wE;
 
-    const y = d.y * wN
+    const y = d.y * freeW
             + gy * wG
-            + (CY + d.dy * scale * 0.82) * wD
             + (CY + d.by * scale * 0.22) * wB
             + (CY + d.ey * scale * 0.10) * wE;
 
@@ -2038,13 +2008,8 @@ function draw() {
   drawDNAOverlay(wD, elapsed);
   drawSolidBarsOverlay(wB);
 
-  let maxDist = 130 + wN * 50;
-  let connW = wN + wG * 0.42;
-
-  if (wD > 0.05) {
-    maxDist = 58;
-    connW += wD * 0.60;
-  }
+  let maxDist = 130 + wN * 50 + wD * 90;
+  let connW = wN + wG * 0.42 + wD * 0.8;
 
   if (connW > 0.05) {
     for (let i = 0; i < display.length; i++) {
@@ -2098,9 +2063,6 @@ function draw() {
   requestAnimationFrame(draw);
 }
 
-/* ============================================================
-   INIT
-============================================================ */
 resize();
 dots = makeDots(NUM_DOTS);
 startTime = performance.now();
