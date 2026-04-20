@@ -483,10 +483,9 @@ footer span { color: var(--teal); }
     <div class="reveal">
       <div class="section-label">Research Output</div>
       <h2 class="section-title">Publications</h2>
-      <p class="section-desc">9 peer-reviewed papers (Q1 journals: 8, Q2 journals: 1). Click any card to expand full details — abstract, highlights, graphical abstract, and DOI.</p>
+      <p class="section-desc">9 peer-reviewed papers — 8 in Q1 journals, 1 in Q2. Click any card to expand full details — abstract, highlights, graphical abstract, and DOI.</p>
     </div>
 
-    <!-- Journal summary pills -->
     <div class="pub-journal-summary reveal">
       <div class="journal-pill">Science of the Total Environment &nbsp;<span>IF 8.0</span>&nbsp; Q1 &nbsp;·&nbsp; <span>3 papers</span></div>
       <div class="journal-pill">Marine Pollution Bulletin &nbsp;<span>IF 4.9</span>&nbsp; Q1 &nbsp;·&nbsp; <span>2 papers</span></div>
@@ -519,21 +518,22 @@ footer span { color: var(--teal); }
               <div class="pub-section-label">My Contribution</div>
               <div class="pub-contribution"><strong>Conceptualization, Writing – review &amp; editing, Visualization, Software, Investigation, Data curation.</strong></div>
               <div class="pub-section-label">Abstract</div>
-              <div class="pub-abstract">Accurate groundwater level prediction is critical for sustainable water resource management, particularly in data-scarce regions. This study develops a hybrid ensemble machine learning framework combining multiple algorithms to predict groundwater levels in northern Bangladesh. The framework integrates rigorous cross-validation, hyperparameter optimization, and uncertainty analysis to deliver robust and interpretable predictions across spatially heterogeneous aquifer systems.</div>
+              <div class="pub-abstract">Accurate groundwater level prediction is critical for sustainable water resource management, particularly in data-scarce regions. This study develops a hybrid ensemble machine learning framework combining multiple algorithms to predict groundwater levels in northern Bangladesh. The framework integrates rigorous cross-validation, hyperparameter optimization, and uncertainty analysis to deliver robust and interpretable predictions across spatially heterogeneous aquifer systems in the Rangpur and Dinajpur districts.</div>
               <div class="pub-section-label">Key Highlights</div>
               <ul class="pub-highlights">
-                <li>First author — led conceptualization, software development, and analysis</li>
-                <li>Hybrid ensemble ML framework for data-scarce groundwater prediction</li>
+                <li>First author — led conceptualization, software development, and full analysis</li>
+                <li>Hybrid ensemble ML framework for data-scarce groundwater level prediction</li>
+                <li>6 hybrid models evaluated across 8 monitoring wells in northern Bangladesh</li>
                 <li>Rigorous validation with cross-validation and uncertainty quantification</li>
-                <li>Applied to spatially heterogeneous aquifer systems in northern Bangladesh</li>
               </ul>
               <a class="pub-doi-link" href="https://doi.org/10.1080/1573062X.2026.2649885" target="_blank">📄 doi:10.1080/1573062X.2026.2649885 ↗</a>
             </div>
             <div class="pub-body-right">
-              <div class="pub-section-label">Read Full Paper</div>
-              <div style="padding:1.5rem;background:rgba(14,244,200,0.04);border:1px solid var(--border);border-radius:6px;text-align:center;color:var(--muted);font-size:0.8rem;">
-                Graphical abstract not available
+              <div class="pub-section-label">Predicted vs Actual GWL — Test Stage</div>
+              <div class="pub-graphical-abstract">
+                <img src="https://raw.githubusercontent.com/Abdullah-TU/Portfolio/main/Fig.%204.jpg" alt="Scatter plot predicted vs actual GWL" loading="lazy">
               </div>
+              <div class="pub-img-caption">Fig. 4 — Predicted vs Actual Groundwater Level across 8 wells (6 hybrid models)</div>
             </div>
             <div style="grid-column:1 / -1; margin-top:1.5rem;">
               <div class="pub-section-label">📖 Read Full Paper</div>
@@ -573,11 +573,11 @@ footer span { color: var(--teal); }
               <div class="pub-section-label">My Contribution</div>
               <div class="pub-contribution"><strong>Writing – review &amp; editing, Visualization, Software, Investigation, Data curation.</strong></div>
               <div class="pub-section-label">Abstract</div>
-              <div class="pub-abstract">Riverine floodplain communities face escalating risks under climate change, environmental degradation, and socio-economic vulnerability. This study develops a rigorously validated framework for assessing community resilience by integrating multi-criteria decision analysis, principal axis factoring, Monte Carlo–based index construction, deep learning validation, and explainable artificial intelligence. Using 1000 georeferenced observations and 56 multidimensional indicators across six domains for 49 unions in the Brahmaputra River Basin (Bangladesh), the study constructs a Combined Multidimensional Resilience Index (CMRI). Deep learning models demonstrate high predictive capability (AUC = 0.989), while SHAP analysis identifies hydraulic deficits, ecological degradation, and institutional weaknesses as primary drivers of vulnerability.</div>
+              <div class="pub-abstract">Riverine floodplain communities face escalating risks under climate change, environmental degradation, and socio-economic vulnerability. This study develops a rigorously validated framework for assessing community resilience by integrating multi-criteria decision analysis, principal axis factoring, Monte Carlo–based index construction, deep learning validation, and explainable artificial intelligence. Using 1000 georeferenced observations and 56 multidimensional indicators for 49 unions in the Brahmaputra River Basin, the study constructs a Combined Multidimensional Resilience Index (CMRI). Deep learning models demonstrate high predictive capability (AUC = 0.989), while SHAP analysis identifies hydraulic deficits, ecological degradation, and institutional weaknesses as primary drivers of vulnerability.</div>
               <div class="pub-section-label">Key Highlights</div>
               <ul class="pub-highlights">
-                <li>Hybrid <strong>MCDA–CMRI–AI framework</strong> for flood-resilience assessment</li>
-                <li>Deep learning model (DR-DNN) achieved <strong>AUC = 0.989</strong></li>
+                <li>Hybrid <strong>MCDA–CMRI–AI framework</strong> for comprehensive flood-resilience assessment</li>
+                <li>Deep learning model (DR-DNN) achieved very high performance — <strong>AUC = 0.989</strong></li>
                 <li>SHAP identified hydraulic deficits and ecological degradation as top drivers</li>
                 <li>Scalable decision-support tool for rural riverine floodplain communities</li>
               </ul>
@@ -628,13 +628,13 @@ footer span { color: var(--teal); }
               <div class="pub-section-label">My Contribution</div>
               <div class="pub-contribution"><strong>Writing – review &amp; editing, Visualization, Software, Investigation, Data curation.</strong></div>
               <div class="pub-section-label">Abstract</div>
-              <div class="pub-abstract">This study presents the first integrated explainable and physics-informed AI framework combining ML, deep learning, and Physics-Informed Neural Networks (PINNs) to predict and interpret seasonal water quality dynamics in the Padma River Basin. Using 44 monitoring sites sampled during winter and monsoon seasons, the framework integrates WQI assessment, SHAP and game-theory attribution, probabilistic uncertainty analysis, and spatial autocorrelation. Seasonal variability dominates over spatial variability, with PINN-based data augmentation improving model generalization under limited sampling.</div>
+              <div class="pub-abstract">This study presents the first integrated explainable and physics-informed AI framework combining ML, deep learning, and Physics-Informed Neural Networks (PINNs) to predict and interpret seasonal water quality dynamics in the Padma River Basin. Using 44 monitoring sites sampled during winter and monsoon seasons, the framework integrates WQI assessment, SHAP and game-theory attribution, probabilistic uncertainty analysis, and spatial autocorrelation. Seasonal variability dominates, with winter low-flow intensifying solute concentrations and monsoon discharge promoting basin-wide dilution and recovery.</div>
               <div class="pub-section-label">Key Highlights</div>
               <ul class="pub-highlights">
                 <li>Seasonal variability dominated water quality dynamics (<strong>p &lt; 0.0001</strong>)</li>
                 <li><strong>DNN</strong> performed best in winter (R² ≈ 0.98)</li>
                 <li><strong>NO₃⁻</strong> emerged as dominant contaminant with episodic WHO exceedance</li>
-                <li><strong>PINN-based augmentation</strong> improved prediction stability</li>
+                <li><strong>PINN-based augmentation</strong> improved prediction stability under limited sampling</li>
               </ul>
               <a class="pub-doi-link" href="https://doi.org/10.1007/s10653-026-03031-z" target="_blank">📄 doi:10.1007/s10653-026-03031-z ↗</a>
             </div>
@@ -689,7 +689,7 @@ footer span { color: var(--teal); }
                 <li>Saltwater intrusion and wastewater as dominant <strong>SO₄²⁻</strong> drivers</li>
                 <li><strong>CatBoost</strong> optimal for sulfate; <strong>ANN</strong> best for nitrate prediction</li>
                 <li><strong>Ca²⁺, Na⁺, K⁺</strong> as primary drivers of contamination levels</li>
-                <li>Hotspots strongly linked to saltwater intrusion and agriculture</li>
+                <li>Hotspots strongly linked to saltwater intrusion and agricultural practices</li>
               </ul>
               <a class="pub-doi-link" href="https://doi.org/10.1016/j.scitotenv.2025.181190" target="_blank">📄 doi:10.1016/j.scitotenv.2025.181190 ↗</a>
             </div>
@@ -738,22 +738,22 @@ footer span { color: var(--teal); }
               <div class="pub-section-label">My Contribution</div>
               <div class="pub-contribution"><strong>Methodology, Investigation, Formal analysis, Writing – review &amp; editing.</strong></div>
               <div class="pub-section-label">Abstract</div>
-              <div class="pub-abstract">This study used traditional statistical techniques (PCA, PCoA) together with machine-learning models including SOM, CIT, Ridge Regression, and SHAP to detect and trace heavy metal sources along the northeast coast of Bangladesh. Concentrations of Pb, Cd, Mn, and As exceeded average shale values. SOM indicated natural sources for As, Ni, Fe, and Mn, and shipbreaking industry sources for Cu, Zn, and Pb. SHAP highlighted soil pH, silt, and organic matter as key contributors.</div>
+              <div class="pub-abstract">This study used traditional statistical techniques (PCA, PCoA) together with machine-learning models including SOM, CIT, Ridge Regression, and SHAP to detect and trace heavy metal sources along the northeast coast of Bangladesh. Concentrations of Pb, Cd, Mn, and As exceeded average shale values. SOM indicated natural sources for As, Ni, Fe, and Mn, and shipbreaking industry sources for Cu, Zn, and Pb. SHAP highlighted soil pH, silt, and organic matter as key contributors to HM accumulation.</div>
               <div class="pub-section-label">Key Highlights</div>
               <ul class="pub-highlights">
                 <li>PCoA explained <strong>75.46%</strong> of total spatial variation</li>
                 <li>SOM identified Cu, Zn, Pb linked to <strong>shipbreaking industry</strong></li>
-                <li>SHAP: soil pH, silt, organic matter as dominant HM accumulation drivers</li>
-                <li>Ridge Regression high predictive performance for Pb, Zn, Mn</li>
+                <li>CIT showed geological controls for Mn and Ni via soil silt and pH</li>
+                <li>SHAP: soil pH, silt, organic matter as key drivers of HM accumulation</li>
               </ul>
               <a class="pub-doi-link" href="https://doi.org/10.1016/j.marpolbul.2025.118701" target="_blank">📄 doi:10.1016/j.marpolbul.2025.118701 ↗</a>
             </div>
             <div class="pub-body-right">
-              <div class="pub-section-label">SOM Component Planes</div>
+              <div class="pub-section-label">SOM Component Planes &amp; Clustering</div>
               <div class="pub-graphical-abstract">
                 <img src="https://github.com/user-attachments/assets/a7eda584-ea12-494d-852d-19d6fdcef21f" alt="SOM component planes" loading="lazy">
               </div>
-              <div class="pub-img-caption">Fig. SOM component planes — heavy metals, coastal Bangladesh</div>
+              <div class="pub-img-caption">Fig. SOM component planes and clustering — heavy metals, coastal Bangladesh</div>
             </div>
             <div style="grid-column:1 / -1; margin-top:1.5rem;">
               <div class="pub-section-label">📖 Read Full Paper</div>
@@ -771,7 +771,7 @@ footer span { color: var(--teal); }
         </div>
       </div>
 
-<!-- PAPER 6 — Climate Drivers Int J Climatology -->
+<!-- PAPER 6 — Climate Drivers -->
       <div class="pub-item" onclick="togglePub(this)">
         <div class="pub-header">
           <div class="pub-num">6</div>
@@ -804,7 +804,7 @@ footer span { color: var(--teal); }
             </div>
             <div class="pub-body-right">
               <div class="pub-section-label">Graphical Abstract</div>
-              <div style="padding:2rem;background:rgba(14,244,200,0.04);border:1px solid var(--border);border-radius:6px;text-align:center;color:var(--muted);font-size:0.8rem;height:100%;display:flex;align-items:center;justify-content:center;">
+              <div style="padding:2rem;background:rgba(14,244,200,0.04);border:1px solid var(--border);border-radius:6px;text-align:center;color:var(--muted);font-size:0.8rem;min-height:200px;display:flex;align-items:center;justify-content:center;">
                 Graphical abstract not yet available
               </div>
             </div>
@@ -834,7 +834,7 @@ footer span { color: var(--teal); }
               <div class="pub-section-label">My Contribution</div>
               <div class="pub-contribution"><strong>Writing – review &amp; editing, Software, Methodology, Formal analysis, Data curation.</strong></div>
               <div class="pub-section-label">Abstract</div>
-              <div class="pub-abstract">This study presents the first integrated probabilistic–spatial framework for assessing radiological risk in Bay of Bengal beach sands. Twenty-two surface sediment samples from three beaches were analyzed using HPGe gamma spectrometry. Activity concentrations of ²²⁶Ra and ²³²Th exceeded global averages by 2.2× and 4.1×. Monte Carlo simulations showed radiological indices exceeding international safety thresholds by 8–23×. GIS-based spatial mapping revealed localized hotspots requiring restricted access and monitoring.</div>
+              <div class="pub-abstract">This study presents the first integrated probabilistic–spatial framework for assessing radiological risk in Bay of Bengal beach sands. Twenty-two surface sediment samples from Darianagar, Himchari, and Nidania beaches were analyzed using HPGe gamma spectrometry. Activity concentrations of ²²⁶Ra and ²³²Th exceeded global averages by 2.2× and 4.1×. Monte Carlo simulations showed radiological indices exceeding international safety thresholds by 8–23×. GIS-based spatial mapping revealed localized hotspots requiring restricted access and monitoring.</div>
               <div class="pub-section-label">Key Highlights</div>
               <ul class="pub-highlights">
                 <li>First integrated <strong>PCA–GIS–Monte Carlo</strong> radiological risk framework</li>
@@ -845,10 +845,23 @@ footer span { color: var(--teal); }
               <a class="pub-doi-link" href="https://doi.org/10.1016/j.marpolbul.2025.118966" target="_blank">📄 doi:10.1016/j.marpolbul.2025.118966 ↗</a>
             </div>
             <div class="pub-body-right">
-              <div class="pub-section-label">Graphical Abstract</div>
-              <div style="padding:2rem;background:rgba(14,244,200,0.04);border:1px solid var(--border);border-radius:6px;text-align:center;color:var(--muted);font-size:0.8rem;height:100%;display:flex;align-items:center;justify-content:center;">
-                Graphical abstract not available
+              <div class="pub-section-label">Study Area — Bay of Bengal, Bangladesh</div>
+              <div class="pub-graphical-abstract">
+                <img src="https://raw.githubusercontent.com/Abdullah-TU/Images-for-Other-Files/main/Fig.%201%20Final.jpg" alt="Study area map Bay of Bengal" loading="lazy">
               </div>
+              <div class="pub-img-caption">Fig. 1 — Multi-scale geological and sampling framework, Bay of Bengal beaches</div>
+            </div>
+            <div style="grid-column:1 / -1; margin-top:1.5rem;">
+              <div class="pub-section-label">📖 Read Full Paper</div>
+              <iframe
+                src="https://mozilla.github.io/pdf.js/web/viewer.html?file=https://raw.githubusercontent.com/Abdullah-TU/Portfolio/main/4%20First%20probabilistic%20radiological%20risk....pdf"
+                style="width:100%;height:850px;border:1px solid var(--border);border-radius:6px;background:#fff;margin-top:0.5rem;display:block;"
+                loading="lazy">
+              </iframe>
+              <a href="https://github.com/Abdullah-TU/Portfolio/raw/main/4%20First%20probabilistic%20radiological%20risk....pdf" target="_blank"
+                 style="display:inline-block;font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--muted);margin-top:0.6rem;text-decoration:none;">
+                ↗ Open PDF in new tab
+              </a>
             </div>
           </div>
         </div>
@@ -876,7 +889,7 @@ footer span { color: var(--teal); }
               <div class="pub-section-label">My Contribution</div>
               <div class="pub-contribution"><strong>Writing – review &amp; editing, Methodology, Formal analysis, Data curation.</strong></div>
               <div class="pub-section-label">Abstract</div>
-              <div class="pub-abstract">This work investigates GPR, Bayesian Ridge Regression, and ANN for predicting groundwater quality in coastal Bangladesh. Optuna-based hyperparameter optimization improves accuracy. Combined cross-validation and bootstrapping methods build six predictive models. The entropy-based ECWQI is converted to five quality classes. SOM identified four distinct spatial patterns. ANN (CV) and ANN (B) models outperformed all others (R² = 0.971 and 0.969). SO₄²⁻, Cl⁻ and F⁻ played key roles in prediction accuracy.</div>
+              <div class="pub-abstract">This work investigates Gaussian Process Regression (GPR), Bayesian Ridge Regression (BRR), and Artificial Neural Network (ANN) for predicting groundwater quality in coastal Bangladesh. Optuna-based hyperparameter optimization improves model accuracy. Combined cross-validation and bootstrapping methods build six predictive models. The entropy-based ECWQI is converted to five quality classes. SOM identified four distinct spatial patterns. ANN (CV) and ANN (B) models outperformed all others (R² = 0.971 and 0.969). SO₄²⁻, Cl⁻ and F⁻ played key roles in prediction accuracy.</div>
               <div class="pub-section-label">Key Highlights</div>
               <ul class="pub-highlights">
                 <li>ANN outperformed all data mining approaches (<strong>R² = 0.971</strong>)</li>
@@ -967,7 +980,6 @@ footer span { color: var(--teal); }
     </div><!-- end pub-cards-grid -->
   </div>
 </section>
-
 <!-- ③ PROJECTS -->
 <section id="projects">
   <div class="section-inner">
