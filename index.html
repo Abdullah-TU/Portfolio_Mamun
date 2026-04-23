@@ -1565,7 +1565,7 @@ const ctx = canvas.getContext('2d');
 let W, H, CX, CY, dots, startTime;
 
 const NUM_DOTS = 200;
-const CYCLE = 57;
+const CYCLE = 43; // Removed bar chart phase
 
 function resize() {
   W = canvas.width = canvas.offsetWidth;
@@ -1602,7 +1602,6 @@ function centerClusterPoints(n, spread = 0.10) {
 
 function makeDots(n) {
   const sph = fibonacciSphere(n);
-  const chart = centerClusterPoints(n, 0.08);
   const heartbeat = centerClusterPoints(n, 0.06);
 
   return Array.from({ length: n }, (_, i) => ({
@@ -1614,15 +1613,22 @@ function makeDots(n) {
     sx: sph[i % sph.length].x,
     sy: sph[i % sph.length].y,
     sz: sph[i % sph.length].z,
-    bx: chart[i % chart.length].x,
-    by: chart[i % chart.length].y,
     ex: heartbeat[i % heartbeat.length].x,
     ey: heartbeat[i % heartbeat.length].y
   }));
 }
 
+// New cycle: Neural → Globe → DNA → ECG → Neural
+// 0-7:   Neural network
+// 7-10:  transition N→G
+// 10-18: Globe + satellites
+// 18-21: transition G→D
+// 21-29: DNA (no background network)
+// 29-32: transition D→E
+// 32-40: ECG + stable network
+// 40-43: transition E→N
 function getWeights(c) {
-  let wN = 0, wG = 0, wD = 0, wB = 0, wE = 0;
+  let wN = 0, wG = 0, wD = 0, wE = 0;
   const t3 = start => easeInOut((c - start) / 3);
 
   if      (c <  7) { wN = 1; }
@@ -1630,13 +1636,11 @@ function getWeights(c) {
   else if (c < 18) { wG = 1; }
   else if (c < 21) { const t = t3(18); wG = 1 - t; wD = t; }
   else if (c < 29) { wD = 1; }
-  else if (c < 32) { const t = t3(29); wD = 1 - t; wB = t; }
-  else if (c < 40) { wB = 1; }
-  else if (c < 43) { const t = t3(40); wB = 1 - t; wE = t; }
-  else if (c < 51) { wE = 1; }
-  else             { const t = t3(51); wE = 1 - t; wN = t; }
+  else if (c < 32) { const t = t3(29); wD = 1 - t; wE = t; }
+  else if (c < 40) { wE = 1; }
+  else             { const t = t3(40); wE = 1 - t; wN = t; }
 
-  return { wN, wG, wD, wB, wE };
+  return { wN, wG, wD, wE };
 }
 
 function drawSatellite(x, y, size, alpha, tilt) {
@@ -1679,6 +1683,7 @@ function drawSatellite(x, y, size, alpha, tilt) {
   ctx.restore();
 }
 
+// Double helix — NO background network during this phase
 function drawDNAOverlay(wD, elapsed) {
   if (wD < 0.01) return;
 
@@ -1695,22 +1700,16 @@ function drawDNAOverlay(wD, elapsed) {
     const p = i / rows;
     const y = CY - height / 2 + p * height;
     const a = p * Math.PI * 2 * turns + speed;
-
     const cosA = Math.cos(a);
     const sinA = Math.sin(a);
 
-    const x1 = CX + sinA * amp;
-    const z1 = cosA;
-    strand1.push({ x: x1, y, z: z1 });
-
-    const x2 = CX + Math.sin(a + Math.PI) * amp;
-    const z2 = Math.cos(a + Math.PI);
-    strand2.push({ x: x2, y, z: z2 });
+    strand1.push({ x: CX + sinA * amp, y, z: cosA });
+    strand2.push({ x: CX + Math.sin(a + Math.PI) * amp, y, z: Math.cos(a + Math.PI) });
   }
 
   ctx.save();
 
-  // Rungs first (behind strands)
+  // Rungs
   for (let i = 0; i <= rows; i += 10) {
     const p1 = strand1[i];
     const p2 = strand2[i];
@@ -1741,14 +1740,13 @@ function drawDNAOverlay(wD, elapsed) {
     ctx.fill();
   }
 
-  // Strand 1 with 3D depth
+  // Strand 1
   for (let i = 0; i < rows; i++) {
     const a = strand1[i];
     const b = strand1[i + 1];
     const avgZ = (a.z + b.z) / 2;
     const depthAlpha = 0.35 + 0.65 * ((avgZ + 1) / 2);
     const lineW = 1.2 + 1.8 * ((avgZ + 1) / 2);
-
     ctx.beginPath();
     ctx.moveTo(a.x, a.y);
     ctx.lineTo(b.x, b.y);
@@ -1759,7 +1757,7 @@ function drawDNAOverlay(wD, elapsed) {
     ctx.stroke();
   }
 
-  // Strand 2 with 3D depth
+  // Strand 2
   ctx.shadowBlur = 0;
   for (let i = 0; i < rows; i++) {
     const a = strand2[i];
@@ -1767,7 +1765,6 @@ function drawDNAOverlay(wD, elapsed) {
     const avgZ = (a.z + b.z) / 2;
     const depthAlpha = 0.35 + 0.65 * ((avgZ + 1) / 2);
     const lineW = 1.2 + 1.8 * ((avgZ + 1) / 2);
-
     ctx.beginPath();
     ctx.moveTo(a.x, a.y);
     ctx.lineTo(b.x, b.y);
@@ -1782,83 +1779,7 @@ function drawDNAOverlay(wD, elapsed) {
   ctx.restore();
 }
 
-function drawSolidBarsOverlay(wB) {
-  if (wB < 0.01) return;
-
-  const scale = Math.min(W, H) * 0.38 * 0.72;
-  const cols = 6;
-  const bH = [0.22, 0.38, 0.54, 0.68, 0.82, 0.96];
-  const bX = [-0.68, -0.42, -0.16, 0.10, 0.36, 0.62];
-  const baseY = 0.62;
-  const barW = 0.13;
-
-  ctx.save();
-  ctx.globalAlpha = wB;
-
-  const baseLeft = CX + (bX[0] - barW * 0.9) * scale;
-  const baseRight = CX + (bX[cols - 1] + barW * 0.9) * scale;
-  const baseLineY = CY + baseY * scale;
-
-  ctx.strokeStyle = 'rgba(14,244,200,0.42)';
-  ctx.lineWidth = 2.2;
-  ctx.beginPath();
-  ctx.moveTo(baseLeft, baseLineY);
-  ctx.lineTo(baseRight, baseLineY);
-  ctx.stroke();
-
-  for (let i = 0; i < cols; i++) {
-    const centerX = CX + bX[i] * scale;
-    const x = centerX - (barW * scale) / 2;
-    const y = CY + (baseY - bH[i] * 1.35) * scale;
-    const width = barW * scale;
-    const height = (bH[i] * 1.35) * scale;
-
-    ctx.fillStyle = 'rgba(14,244,200,0.16)';
-    ctx.strokeStyle = 'rgba(14,244,200,0.30)';
-    ctx.lineWidth = 1.4;
-    ctx.fillRect(x, y, width, height);
-    ctx.strokeRect(x, y, width, height);
-  }
-
-  const points = [
-    { x: CX + (-0.68) * scale, y: CY + (0.62 - 0.22 * 1.35 - 0.09) * scale },
-    { x: CX + (-0.42) * scale, y: CY + (0.62 - 0.38 * 1.35 - 0.09) * scale },
-    { x: CX + (-0.16) * scale, y: CY + (0.62 - 0.54 * 1.35 - 0.09) * scale },
-    { x: CX + ( 0.10) * scale, y: CY + (0.62 - 0.68 * 1.35 - 0.09) * scale },
-    { x: CX + ( 0.36) * scale, y: CY + (0.62 - 0.82 * 1.35 - 0.09) * scale },
-    { x: CX + ( 0.62) * scale, y: CY + (0.62 - 0.96 * 1.35 - 0.09) * scale }
-  ];
-
-  ctx.shadowColor = '#0ef4c8';
-  ctx.shadowBlur = 12;
-  ctx.strokeStyle = 'rgba(14,244,200,0.82)';
-  ctx.lineWidth = 2.2;
-  ctx.beginPath();
-  ctx.moveTo(points[0].x, points[0].y);
-  for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
-  ctx.stroke();
-
-  const pLast = points[points.length - 1];
-  const pPrev = points[points.length - 2];
-  const angle = Math.atan2(pLast.y - pPrev.y, pLast.x - pPrev.x);
-  const ah = 10;
-  ctx.beginPath();
-  ctx.moveTo(pLast.x, pLast.y);
-  ctx.lineTo(pLast.x - Math.cos(angle - Math.PI / 6) * ah, pLast.y - Math.sin(angle - Math.PI / 6) * ah);
-  ctx.moveTo(pLast.x, pLast.y);
-  ctx.lineTo(pLast.x - Math.cos(angle + Math.PI / 6) * ah, pLast.y - Math.sin(angle + Math.PI / 6) * ah);
-  ctx.stroke();
-
-  for (const p of points) {
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, 4.2, 0, Math.PI * 2);
-    ctx.fillStyle = '#0ef4c8';
-    ctx.fill();
-  }
-
-  ctx.restore();
-}
-
+// ECG — single clean heartbeat, no network appearing/disappearing issues
 function drawFullECGOverlay(wE, elapsed) {
   if (wE < 0.01) return;
 
@@ -1887,6 +1808,7 @@ function drawFullECGOverlay(wE, elapsed) {
   ctx.shadowColor = '#0ef4c8';
   ctx.shadowBlur = 16;
 
+  // Glow layer
   ctx.beginPath();
   ctx.lineWidth = 9;
   ctx.strokeStyle = `rgba(14,244,200,${0.09 * wE})`;
@@ -1900,6 +1822,7 @@ function drawFullECGOverlay(wE, elapsed) {
   }
   ctx.stroke();
 
+  // Main line
   ctx.beginPath();
   ctx.lineWidth = 3.0;
   ctx.strokeStyle = '#0ef4c8';
@@ -1913,11 +1836,11 @@ function drawFullECGOverlay(wE, elapsed) {
   }
   ctx.stroke();
 
+  // Moving cursor dot
   const cursorT = (elapsed * 0.35) % 1;
   const cycX = (cursorT * cycles + phase) % 1;
   const dotX = left + cursorT * width;
   const dotY = yMid + (-ecgY(cycX) * 0.80) * amp;
-
   ctx.beginPath();
   ctx.arc(dotX, dotY, 5, 0, Math.PI * 2);
   ctx.fillStyle = '#0ef4c8';
@@ -1927,11 +1850,12 @@ function drawFullECGOverlay(wE, elapsed) {
   ctx.restore();
 }
 
-function drawBackgroundNetwork(strength = 1) {
+// Stable background network — consistent, no pulsing in/out
+function drawBackgroundNetwork(strength) {
   if (strength <= 0.01) return;
 
-  const maxDist = 180;
-  const alphaBase = 0.34 * strength;
+  const maxDist = 175;
+  const alphaBase = 0.30 * strength;
   const elapsed = (performance.now() - startTime) / 1000;
 
   for (let i = 0; i < dots.length; i++) {
@@ -1945,7 +1869,7 @@ function drawBackgroundNetwork(strength = 1) {
         ctx.moveTo(a.x, a.y);
         ctx.lineTo(b.x, b.y);
         ctx.strokeStyle = `rgba(14,244,200,${(1 - dd / maxDist) * alphaBase})`;
-        ctx.lineWidth = 1.15;
+        ctx.lineWidth = 1.0;
         ctx.stroke();
       }
     }
@@ -1953,10 +1877,11 @@ function drawBackgroundNetwork(strength = 1) {
 
   for (let i = 0; i < dots.length; i++) {
     const p = dots[i];
-    const pulse = 0.88 + Math.sin(elapsed * 1.7 + i * 0.15) * 0.12;
+    // Gentle pulse — no dramatic in/out
+    const pulse = 0.92 + Math.sin(elapsed * 1.4 + i * 0.12) * 0.08;
     ctx.beginPath();
     ctx.arc(p.x, p.y, p.r * pulse, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(14,244,200,${0.40 * strength})`;
+    ctx.fillStyle = `rgba(14,244,200,${0.38 * strength})`;
     ctx.fill();
   }
 }
@@ -1971,10 +1896,11 @@ function draw() {
   const rotY = elapsed * 0.40;
   const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
 
-  const { wN, wG, wD, wB, wE } = getWeights(cycleTime);
+  const { wN, wG, wD, wE } = getWeights(cycleTime);
 
   ctx.clearRect(0, 0, W, H);
 
+  // Move all dots freely at all times
   for (const d of dots) {
     d.x += d.vx;
     d.y += d.vy;
@@ -1982,34 +1908,34 @@ function draw() {
     if (d.y < 0 || d.y > H) d.vy *= -1;
   }
 
-  drawBackgroundNetwork(wB + wE + wD * 1.0);
+  // Background network: active during Neural and ECG phases only
+  // During DNA: no network (clean DNA only)
+  // During Globe: dots form globe shape so no separate network needed
+  const networkStrength = wN + wE;
+  drawBackgroundNetwork(networkStrength);
 
+  // Compute display positions
   const display = dots.map(d => {
     const rx = d.sx * cosY + d.sz * sinY;
     const rz = -d.sx * sinY + d.sz * cosY;
     const gx = CX + rx * globeR;
     const gy = CY + d.sy * globeR;
 
-    const freeW = wN + wD;
+    // Dots stay free during DNA phase — no morphing
+    const freeW = wN + wD + wE;
 
-    const x = d.x * freeW
-            + gx * wG
-            + (CX + d.bx * scale * 0.22) * wB
-            + (CX + d.ex * scale * 0.10) * wE;
-
-    const y = d.y * freeW
-            + gy * wG
-            + (CY + d.by * scale * 0.22) * wB
-            + (CY + d.ey * scale * 0.10) * wE;
+    const x = d.x * freeW + gx * wG;
+    const y = d.y * freeW + gy * wG;
 
     return { x, y, r: d.r, depth: rz };
   });
 
+  // Draw DNA (no network behind it)
   drawDNAOverlay(wD, elapsed);
-  drawSolidBarsOverlay(wB);
 
-  let maxDist = 130 + wN * 50 + wD * 90;
-  let connW = wN + wG * 0.42 + wD * 0.8;
+  // Draw connections between dots
+  const maxDist = 130 + wN * 50;
+  const connW = wN + wG * 0.42;
 
   if (connW > 0.05) {
     for (let i = 0; i < display.length; i++) {
@@ -2030,7 +1956,9 @@ function draw() {
     }
   }
 
-  const foregroundAlpha = 1 - (wB * 0.96 + wE * 0.98);
+  // Draw dots — hidden during ECG (ECG takes full screen)
+  // Hidden during DNA (DNA is the focus)
+  const foregroundAlpha = wN + wG * 0.8;
 
   if (foregroundAlpha > 0.02) {
     for (const p of display) {
@@ -2042,13 +1970,13 @@ function draw() {
     }
   }
 
+  // Globe satellites
   if (wG > 0.04) {
     const satCfg = [
       { speed: 0.40, phase: 0,              size: 27.5 },
       { speed: 0.62, phase: Math.PI * 0.67, size: 22.5 },
       { speed: 0.28, phase: Math.PI * 1.34, size: 20.0 }
     ];
-
     for (const s of satCfg) {
       const angle = elapsed * s.speed + s.phase;
       const orbitR = globeR * 1.32;
@@ -2058,6 +1986,7 @@ function draw() {
     }
   }
 
+  // ECG — drawn on top, full screen
   drawFullECGOverlay(wE, elapsed);
 
   requestAnimationFrame(draw);
