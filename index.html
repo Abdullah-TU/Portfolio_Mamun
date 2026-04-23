@@ -1618,6 +1618,7 @@ function makeDots(n) {
   }));
 }
 
+// Sequence: Neural(0-7) → Globe(10-18) → DNA(21-29) → ECG(32-40) → Neural
 function getWeights(c) {
   let wN = 0, wG = 0, wD = 0, wE = 0;
   const t3 = start => easeInOut((c - start) / 3);
@@ -1765,7 +1766,6 @@ function drawDNAOverlay(wD, elapsed) {
   ctx.restore();
 }
 
-// CHANGE 2: yMid moved from 0.47 to 0.72 — sits below badges
 function drawFullECGOverlay(wE, elapsed) {
   if (wE < 0.01) return;
 
@@ -1833,13 +1833,12 @@ function drawFullECGOverlay(wE, elapsed) {
   ctx.restore();
 }
 
-// Same nice small network used for both Neural and ECG background
-// CHANGE 1: also used for Globe background now
-function drawBackgroundNetwork(strength) {
+// Nice small network — used ONLY for Neural and ECG phases
+function drawNiceNetwork(strength) {
   if (strength <= 0.01) return;
 
-  const maxDist = 175;
-  const alphaBase = 0.30 * strength;
+  const maxDist = 160;
+  const alphaBase = 0.28 * strength;
   const elapsed = (performance.now() - startTime) / 1000;
 
   for (let i = 0; i < dots.length; i++) {
@@ -1853,7 +1852,7 @@ function drawBackgroundNetwork(strength) {
         ctx.moveTo(a.x, a.y);
         ctx.lineTo(b.x, b.y);
         ctx.strokeStyle = `rgba(14,244,200,${(1 - dd / maxDist) * alphaBase})`;
-        ctx.lineWidth = 1.0;
+        ctx.lineWidth = 0.8;
         ctx.stroke();
       }
     }
@@ -1864,7 +1863,7 @@ function drawBackgroundNetwork(strength) {
     const pulse = 0.92 + Math.sin(elapsed * 1.4 + i * 0.12) * 0.08;
     ctx.beginPath();
     ctx.arc(p.x, p.y, p.r * pulse, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(14,244,200,${0.38 * strength})`;
+    ctx.fillStyle = `rgba(14,244,200,${0.35 * strength})`;
     ctx.fill();
   }
 }
@@ -1874,7 +1873,6 @@ function draw() {
   const cycleTime = elapsed % CYCLE;
 
   const globeR = Math.min(W, H) * 0.32;
-  const scale = Math.min(W, H) * 0.38;
 
   const rotY = elapsed * 0.40;
   const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
@@ -1883,6 +1881,7 @@ function draw() {
 
   ctx.clearRect(0, 0, W, H);
 
+  // Move all dots freely always
   for (const d of dots) {
     d.x += d.vx;
     d.y += d.vy;
@@ -1890,34 +1889,30 @@ function draw() {
     if (d.y < 0 || d.y > H) d.vy *= -1;
   }
 
-  // CHANGE 1: Globe now also gets the nice background network
-  // Neural + Globe + ECG all use same network style
-  // DNA gets no network
-  const networkStrength = wN + wG + wE;
-  drawBackgroundNetwork(networkStrength);
+  // Nice network: Neural + ECG only — Globe gets ZERO network
+  drawNiceNetwork(wN + wE);
 
+  // Compute display positions for globe morphing
   const display = dots.map(d => {
     const rx = d.sx * cosY + d.sz * sinY;
     const rz = -d.sx * sinY + d.sz * cosY;
     const gx = CX + rx * globeR;
     const gy = CY + d.sy * globeR;
 
+    // During DNA and ECG: dots stay free
     const freeW = wN + wD + wE;
-
     const x = d.x * freeW + gx * wG;
     const y = d.y * freeW + gy * wG;
 
     return { x, y, r: d.r, depth: rz };
   });
 
-  // DNA — no network
+  // DNA — pure clean helix, no network
   drawDNAOverlay(wD, elapsed);
 
-  // Neural + Globe connections between morphed dots
-  const maxDist = 130 + wN * 50;
-  const connW = wN + wG * 0.42;
-
-  if (connW > 0.05) {
+  // Globe wireframe connections between morphed dots — ONLY during globe
+  if (wG > 0.05) {
+    const maxDist = 120;
     for (let i = 0; i < display.length; i++) {
       for (let j = i + 1; j < display.length; j++) {
         const a = display[i], b = display[j];
@@ -1928,17 +1923,16 @@ function draw() {
           ctx.beginPath();
           ctx.moveTo(a.x, a.y);
           ctx.lineTo(b.x, b.y);
-          ctx.strokeStyle = `rgba(14,244,200,${0.42 * (1 - distance / maxDist) * connW})`;
-          ctx.lineWidth = 1.2;
+          ctx.strokeStyle = `rgba(14,244,200,${0.35 * wG * (1 - distance / maxDist)})`;
+          ctx.lineWidth = 0.9;
           ctx.stroke();
         }
       }
     }
   }
 
-  // Dot rendering — visible during Neural and Globe phases
+  // Dots visible during Neural and Globe only
   const foregroundAlpha = wN + wG * 0.8;
-
   if (foregroundAlpha > 0.02) {
     for (const p of display) {
       const depthScale = wG > 0.15 ? (0.50 + 0.50 * ((p.depth + 1) / 2)) : 1;
@@ -1965,7 +1959,7 @@ function draw() {
     }
   }
 
-  // ECG drawn last, positioned lower
+  // ECG last — sits in lower zone
   drawFullECGOverlay(wE, elapsed);
 
   requestAnimationFrame(draw);
