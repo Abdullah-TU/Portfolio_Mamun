@@ -1565,7 +1565,7 @@ const ctx = canvas.getContext('2d');
 let W, H, CX, CY, dots, startTime;
 
 const NUM_DOTS = 200;
-const CYCLE = 43;
+const CYCLE = 33;
 
 function resize() {
   W = canvas.width = canvas.offsetWidth;
@@ -1618,21 +1618,19 @@ function makeDots(n) {
   }));
 }
 
-// Sequence: Neural(0-7) → Globe(10-18) → DNA(21-29) → ECG(32-40) → Neural
+// Sequence: Globe(0-8) → DNA(11-19) → ECG(22-30) → Globe
 function getWeights(c) {
-  let wN = 0, wG = 0, wD = 0, wE = 0;
+  let wG = 0, wD = 0, wE = 0;
   const t3 = start => easeInOut((c - start) / 3);
 
-  if      (c <  7) { wN = 1; }
-  else if (c < 10) { const t = t3(7);  wN = 1 - t; wG = t; }
-  else if (c < 18) { wG = 1; }
-  else if (c < 21) { const t = t3(18); wG = 1 - t; wD = t; }
-  else if (c < 29) { wD = 1; }
-  else if (c < 32) { const t = t3(29); wD = 1 - t; wE = t; }
-  else if (c < 40) { wE = 1; }
-  else             { const t = t3(40); wE = 1 - t; wN = t; }
+  if      (c <  8) { wG = 1; }
+  else if (c < 11) { const t = t3(8);  wG = 1 - t; wD = t; }
+  else if (c < 19) { wD = 1; }
+  else if (c < 22) { const t = t3(19); wD = 1 - t; wE = t; }
+  else if (c < 30) { wE = 1; }
+  else             { const t = t3(30); wE = 1 - t; wG = t; }
 
-  return { wN, wG, wD, wE };
+  return { wG, wD, wE };
 }
 
 function drawSatellite(x, y, size, alpha, tilt) {
@@ -1833,7 +1831,7 @@ function drawFullECGOverlay(wE, elapsed) {
   ctx.restore();
 }
 
-// Nice small network — used ONLY for Neural and ECG phases
+// Nice small network — used ONLY for ECG phase
 function drawNiceNetwork(strength) {
   if (strength <= 0.01) return;
 
@@ -1877,7 +1875,7 @@ function draw() {
   const rotY = elapsed * 0.40;
   const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
 
-  const { wN, wG, wD, wE } = getWeights(cycleTime);
+  const { wG, wD, wE } = getWeights(cycleTime);
 
   ctx.clearRect(0, 0, W, H);
 
@@ -1889,8 +1887,8 @@ function draw() {
     if (d.y < 0 || d.y > H) d.vy *= -1;
   }
 
-  // Nice network: Neural + ECG only — Globe gets ZERO network
-  drawNiceNetwork(wN + wE);
+  // Nice network: ECG only
+  drawNiceNetwork(wE);
 
   // Compute display positions for globe morphing
   const display = dots.map(d => {
@@ -1900,7 +1898,7 @@ function draw() {
     const gy = CY + d.sy * globeR;
 
     // During DNA and ECG: dots stay free
-    const freeW = wN + wD + wE;
+    const freeW = wD + wE;
     const x = d.x * freeW + gx * wG;
     const y = d.y * freeW + gy * wG;
 
@@ -1931,8 +1929,8 @@ function draw() {
     }
   }
 
-  // Dots visible during Neural and Globe only
-  const foregroundAlpha = wN + wG * 0.8;
+  // Dots visible during Globe only
+  const foregroundAlpha = wG * 0.8;
   if (foregroundAlpha > 0.02) {
     for (const p of display) {
       const depthScale = wG > 0.15 ? (0.50 + 0.50 * ((p.depth + 1) / 2)) : 1;
@@ -1943,7 +1941,7 @@ function draw() {
     }
   }
 
-  // Globe satellites — unchanged
+  // Globe satellites
   if (wG > 0.04) {
     const satCfg = [
       { speed: 0.40, phase: 0,              size: 27.5 },
