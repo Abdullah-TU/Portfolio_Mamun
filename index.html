@@ -440,39 +440,78 @@ footer span { color: var(--teal); }
     <div class="reveal">
       <div class="section-label">Expertise</div>
       <h2 class="section-title">Skills &amp; Technologies</h2>
-      <p class="section-desc">Hover to pause. Spanning programming, ML/DL, cloud, GIS, and visualization.</p>
     </div>
-  </div>
-  <div class="slider-wrapper reveal">
-    <div class="slider-track">
-      <div class="skill-chip">🐍 Python</div><div class="skill-chip">📊 R</div>
-      <div class="skill-chip">☕ Java</div><div class="skill-chip">🌐 Java</div>
-      <div class="skill-chip">🤖 TensorFlow</div><div class="skill-chip">🔥 PyTorch</div>
-      <div class="skill-chip">🧠 Scikit-learn</div><div class="skill-chip">📈 NumPy / Pandas</div>
-      <div class="skill-chip">🗺️ QGIS</div><div class="skill-chip">📉 Power BI</div>
-      <div class="skill-chip">☁️ Microsoft Azure</div><div class="skill-chip">🗄️ SQL / PostgreSQL</div>
-      <div class="skill-chip">🐍 Python</div><div class="skill-chip">📊 R</div>
-      <div class="skill-chip">☕ Java</div><div class="skill-chip">🌐 Java</div>
-      <div class="skill-chip">🤖 TensorFlow</div><div class="skill-chip">🔥 PyTorch</div>
-      <div class="skill-chip">🧠 Scikit-learn</div><div class="skill-chip">📈 NumPy / Pandas</div>
-      <div class="skill-chip">🗺️ QGIS</div><div class="skill-chip">📉 Power BI</div>
-      <div class="skill-chip">☁️ Microsoft Azure</div><div class="skill-chip">🗄️ SQL / PostgreSQL</div>
-    </div>
-  </div>
-  <div class="slider-wrapper reveal" style="margin-top:1rem;">
-    <div class="slider-track" style="animation-direction:reverse;animation-duration:25s;">
-      <div class="skill-chip">🧬 CNNs / RNNs</div><div class="skill-chip">💬 NLP</div>
-      <div class="skill-chip">👁️ Computer Vision</div><div class="skill-chip">🔁 Transfer Learning</div>
-      <div class="skill-chip">🎮 Reinforcement Learning</div><div class="skill-chip">📦 Git / GitHub</div>
-      <div class="skill-chip">🔬 Web Scraping</div><div class="skill-chip">📲 Android Dev</div>
-      <div class="skill-chip">🌊 GIS Mapping</div><div class="skill-chip">📡 XAI / SHAP</div>
-      <div class="skill-chip">🧪 Unit Testing</div><div class="skill-chip">🗃️ MongoDB</div>
-      <div class="skill-chip">🧬 CNNs / RNNs</div><div class="skill-chip">💬 NLP</div>
-      <div class="skill-chip">👁️ Computer Vision</div><div class="skill-chip">🔁 Transfer Learning</div>
-      <div class="skill-chip">🎮 Reinforcement Learning</div><div class="skill-chip">📦 Git / GitHub</div>
-      <div class="skill-chip">🔬 Web Scraping</div><div class="skill-chip">📲 Android Dev</div>
-      <div class="skill-chip">🌊 GIS Mapping</div><div class="skill-chip">📡 XAI / SHAP</div>
-      <div class="skill-chip">🧪 Unit Testing</div><div class="skill-chip">🗃️ MongoDB</div>
+
+    <div class="reveal" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:2rem;margin-top:2rem;">
+
+      <!-- Programming -->
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--teal);letter-spacing:0.18em;text-transform:uppercase;margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border);">Programming Languages</div>
+        <div style="display:flex;flex-wrap:wrap;gap:0.5rem;">
+          <span class="skill-chip">🐍 Python</span>
+          <span class="skill-chip">📊 R</span>
+          <span class="skill-chip">☕ Java</span>
+          <span class="skill-chip">🌐 JavaScript</span>
+          <span class="skill-chip">🗄️ SQL</span>
+        </div>
+      </div>
+
+      <!-- ML / DL Frameworks -->
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--teal);letter-spacing:0.18em;text-transform:uppercase;margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border);">ML / DL Frameworks</div>
+        <div style="display:flex;flex-wrap:wrap;gap:0.5rem;">
+          <span class="skill-chip">🔥 PyTorch</span>
+          <span class="skill-chip">🤖 TensorFlow</span>
+          <span class="skill-chip">🧠 Scikit-learn</span>
+          <span class="skill-chip">📈 NumPy / Pandas</span>
+          <span class="skill-chip">⚡ XGBoost / CatBoost</span>
+        </div>
+      </div>
+
+      <!-- Deep Learning -->
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--teal);letter-spacing:0.18em;text-transform:uppercase;margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border);">Deep Learning</div>
+        <div style="display:flex;flex-wrap:wrap;gap:0.5rem;">
+          <span class="skill-chip">🧬 CNNs / RNNs</span>
+          <span class="skill-chip">💬 NLP</span>
+          <span class="skill-chip">👁️ Computer Vision</span>
+          <span class="skill-chip">🔁 Transfer Learning</span>
+          <span class="skill-chip">🎮 Reinforcement Learning</span>
+        </div>
+      </div>
+
+      <!-- XAI & Analytics -->
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--teal);letter-spacing:0.18em;text-transform:uppercase;margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border);">XAI &amp; Analytics</div>
+        <div style="display:flex;flex-wrap:wrap;gap:0.5rem;">
+          <span class="skill-chip">📡 XAI / SHAP</span>
+          <span class="skill-chip">📉 Power BI</span>
+          <span class="skill-chip">🔬 Web Scraping</span>
+          <span class="skill-chip">🧪 Unit Testing</span>
+        </div>
+      </div>
+
+      <!-- GIS & Spatial -->
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--teal);letter-spacing:0.18em;text-transform:uppercase;margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border);">GIS &amp; Spatial</div>
+        <div style="display:flex;flex-wrap:wrap;gap:0.5rem;">
+          <span class="skill-chip">🗺️ QGIS</span>
+          <span class="skill-chip">🌊 GIS Mapping</span>
+        </div>
+      </div>
+
+      <!-- Tools & Cloud -->
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--teal);letter-spacing:0.18em;text-transform:uppercase;margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border);">Tools &amp; Cloud</div>
+        <div style="display:flex;flex-wrap:wrap;gap:0.5rem;">
+          <span class="skill-chip">☁️ Microsoft Azure</span>
+          <span class="skill-chip">📦 Git / GitHub</span>
+          <span class="skill-chip">🗄️ SQL / PostgreSQL</span>
+          <span class="skill-chip">🗃️ MongoDB</span>
+          <span class="skill-chip">📲 Android Dev</span>
+        </div>
+      </div>
+
     </div>
   </div>
 </section>
