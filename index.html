@@ -139,8 +139,8 @@ section { padding: 5rem 2rem; }
    PUBLICATION CARDS — EXPANDABLE
 ═══════════════════════════════════ */
 .pub-journal-summary {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
   margin-bottom: 2.5rem;
 }
@@ -156,8 +156,14 @@ section { padding: 5rem 2rem; }
   font-size: 0.7rem;
   color: var(--text2);
   white-space: nowrap;
+  min-width: 0;
 }
 .journal-pill span { color: var(--teal); font-weight: 600; }
+
+@media (max-width: 700px) {
+  .pub-journal-summary { grid-template-columns: 1fr; }
+  .journal-pill { white-space: normal; flex-wrap: wrap; }
+}
 
 .pub-cards-grid {
   display: grid;
