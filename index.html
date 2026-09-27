@@ -1806,7 +1806,6 @@ const ctx = canvas.getContext('2d');
 let W, H, CX, CY, dots, startTime;
 
 const NUM_DOTS = 200;
-const CYCLE = 22;
 
 function resize() {
   W = canvas.width = canvas.offsetWidth;
@@ -1859,20 +1858,6 @@ function makeDots(n) {
   }));
 }
 
-// Sequence: Globe (0-8) → DNA (11-19) → Globe
-function getWeights(c) {
-  let wG = 0, wD = 0, wE = 0;
-  const t3 = start => easeInOut((c - start) / 3);
-
-  if      (c <  8) { wG = 1; }
-  else if (c < 11) { const t = t3(8);  wG = 1 - t; wD = t; }
-  else if (c < 19) { wD = 1; }
-  else if (c < 22) { const t = t3(19); wD = 1 - t; wG = t; }
-  else             { wG = 1; }
-
-  return { wG, wD, wE };
-}
-
 function drawSatellite(x, y, size, alpha, tilt) {
   ctx.save();
   ctx.translate(x, y);
@@ -1910,97 +1895,6 @@ function drawSatellite(x, y, size, alpha, tilt) {
   ctx.fillStyle = '#0ef4c8';
   ctx.fill();
 
-  ctx.restore();
-}
-
-function drawDNAOverlay(wD, elapsed) {
-  if (wD < 0.01) return;
-
-  const turns = 2.8;
-  const height = Math.min(W, H) * 0.78;
-  const amp = Math.min(W, H) * 0.14;
-  const rows = 160;
-  const speed = elapsed * 1.2;
-
-  const strand1 = [];
-  const strand2 = [];
-
-  for (let i = 0; i <= rows; i++) {
-    const p = i / rows;
-    const y = CY - height / 2 + p * height;
-    const a = p * Math.PI * 2 * turns + speed;
-    const cosA = Math.cos(a);
-    const sinA = Math.sin(a);
-    strand1.push({ x: CX + sinA * amp, y, z: cosA });
-    strand2.push({ x: CX + Math.sin(a + Math.PI) * amp, y, z: Math.cos(a + Math.PI) });
-  }
-
-  ctx.save();
-
-  for (let i = 0; i <= rows; i += 10) {
-    const p1 = strand1[i];
-    const p2 = strand2[i];
-    const avgZ = (p1.z + p2.z) / 2;
-    const depthAlpha = 0.2 + 0.5 * ((avgZ + 1) / 2);
-    const rungW = 0.6 + 0.8 * ((avgZ + 1) / 2);
-
-    ctx.beginPath();
-    ctx.moveTo(p1.x, p1.y);
-    ctx.lineTo(p2.x, p2.y);
-    ctx.strokeStyle = `rgba(14,244,200,${wD * depthAlpha * 0.55})`;
-    ctx.lineWidth = rungW;
-    ctx.stroke();
-
-    const nodeR1 = 2.5 + 2.5 * ((p1.z + 1) / 2);
-    const nodeR2 = 2.5 + 2.5 * ((p2.z + 1) / 2);
-    const nodeA1 = wD * (0.4 + 0.6 * ((p1.z + 1) / 2));
-    const nodeA2 = wD * (0.4 + 0.6 * ((p2.z + 1) / 2));
-
-    ctx.beginPath();
-    ctx.arc(p1.x, p1.y, nodeR1, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(14,244,200,${nodeA1})`;
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.arc(p2.x, p2.y, nodeR2, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(7,196,160,${nodeA2})`;
-    ctx.fill();
-  }
-
-  for (let i = 0; i < rows; i++) {
-    const a = strand1[i];
-    const b = strand1[i + 1];
-    const avgZ = (a.z + b.z) / 2;
-    const depthAlpha = 0.35 + 0.65 * ((avgZ + 1) / 2);
-    const lineW = 1.2 + 1.8 * ((avgZ + 1) / 2);
-    ctx.beginPath();
-    ctx.moveTo(a.x, a.y);
-    ctx.lineTo(b.x, b.y);
-    ctx.strokeStyle = `rgba(14,244,200,${wD * depthAlpha * 0.9})`;
-    ctx.lineWidth = lineW;
-    ctx.shadowColor = '#0ef4c8';
-    ctx.shadowBlur = avgZ > 0 ? 12 : 0;
-    ctx.stroke();
-  }
-
-  ctx.shadowBlur = 0;
-  for (let i = 0; i < rows; i++) {
-    const a = strand2[i];
-    const b = strand2[i + 1];
-    const avgZ = (a.z + b.z) / 2;
-    const depthAlpha = 0.35 + 0.65 * ((avgZ + 1) / 2);
-    const lineW = 1.2 + 1.8 * ((avgZ + 1) / 2);
-    ctx.beginPath();
-    ctx.moveTo(a.x, a.y);
-    ctx.lineTo(b.x, b.y);
-    ctx.strokeStyle = `rgba(7,196,160,${wD * depthAlpha * 0.9})`;
-    ctx.lineWidth = lineW;
-    ctx.shadowColor = '#07c4a0';
-    ctx.shadowBlur = avgZ > 0 ? 10 : 0;
-    ctx.stroke();
-  }
-
-  ctx.shadowBlur = 0;
   ctx.restore();
 }
 
@@ -2108,14 +2002,14 @@ function drawNiceNetwork(strength) {
 
 function draw() {
   const elapsed = (performance.now() - startTime) / 1000;
-  const cycleTime = elapsed % CYCLE;
 
   const globeR = Math.min(W, H) * 0.32;
 
   const rotY = elapsed * 0.40;
   const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
 
-  const { wG, wD, wE } = getWeights(cycleTime);
+  // Globe only
+  const wG = 1, wE = 0;
 
   ctx.clearRect(0, 0, W, H);
 
@@ -2136,16 +2030,12 @@ function draw() {
     const gx = CX + rx * globeR;
     const gy = CY + d.sy * globeR;
 
-    // During DNA and ECG: dots stay free
-    const freeW = wD + wE;
+    const freeW = wE;
     const x = d.x * freeW + gx * wG;
     const y = d.y * freeW + gy * wG;
 
     return { x, y, r: d.r, depth: rz };
   });
-
-  // DNA — pure clean helix, no network
-  drawDNAOverlay(wD, elapsed);
 
   // Globe wireframe connections between morphed dots — ONLY during globe
   if (wG > 0.05) {
